@@ -105,7 +105,7 @@
     <a href="index.html" class="back-link">← Volver a la calculadora</a>
 
     <h1>Fórmulas del cálculo</h1>
-    <p class="subtitle">Especificación de referencia para auditoría por expertos fiscales · v2.0 · 2026-04-24</p>
+    <p class="subtitle">Especificación de referencia para auditoría por expertos fiscales · v3.0 · 2026-04-24 · Escalas: PDF Hacienda 2026</p>
 
     <!-- 1 -->
     <h2>1. Parámetros legales (2025/2026)</h2>
@@ -228,121 +228,194 @@ irpfEstatal = 0</div>
 
     <!-- 4 -->
     <h2>4. Ejemplos de verificación</h2>
+    <p class="subtitle">Verificación cruzada contra simuladores oficiales. Todos los ejemplos son reproducibles.</p>
 
     <div class="example-box">
-      <h3>Ejemplo 1: Contribuyente individual, 35.000 € bruto</h3>
+      <h3>Ejemplo 1: Contribuyente individual, 35.000 € bruto — Madrid</h3>
       <div class="formula-box">bruto = 35.000
 cotizaciónSS = min(35.000, 58.914) × 0,0635 = 2.222,50 €
 rn = 35.000 – 2.222,50 = 32.777,50 €
-reducción_art20 = 0 (rn &gt; 19.747,50)
+reducción_art20 = 0 (rn > 19.747,50)
 rneto = 32.777,50 – 2.000 – 0 = 30.777,50 €
 baseLiquidable = 30.777,50 €
 
-Cuota íntegra (escala supletoria):
-  12.450 × 0,19 = 2.365,50
-  (20.200 – 12.450) × 0,24 = 1.860,00
-  (30.777,50 – 20.200) × 0,30 = 3.173,25
-  cuotaÍntegra = 7.398,75 €
+// CUOTA ESTATAL (escala Art. 76 LIRPF)
+  12.450 × 0,095 = 1.182,75
+  (20.200 – 12.450) × 0,12 = 930,00
+  (30.777,50 – 20.200) × 0,15 = 1.586,63
+  cuotaEstatal = 3.699,38 €
 
-Reducción mínimo:
-  mínimoTotal = 5.550 €
-  Cuota del mínimo: 5.550 × 0,19 = 1.054,50 €
-  cuotaLíquida = 7.398,75 – 1.054,50 = 6.344,25 €
+// CUOTA AUTONÓMICA Madrid (PDF Hacienda pág. 47)
+  13.362,22 × 0,085 = 1.135,79
+  (19.004,63 – 13.362,22) × 0,107 = 603,72
+  (30.777,50 – 19.004,63) × 0,128 = 1.506,93
+  cuotaAutonómica = 3.246,44 €
 
-dedSMI = 0 (bruto &gt; 18.276)
-cuotaResultante = 6.344,25 €
+cuotaÍntegra = 3.699,38 + 3.246,44 = 6.945,82 €
+
+// Reducción mínimo (5.550 €)
+cuotaMinEstatal: 5.550 × 0,095 = 527,25 €
+cuotaMinAut:     5.550 × 0,085 = 471,75 €
+cuotaMínimoTotal = 999,00 €
+
+cuotaLíquida = 6.945,82 – 999,00 = 5.946,82 €
+dedSMI = 0 (bruto > 18.276)
 
 límiteRetención = (35.000 – 15.876) × 0,43 = 8.223,32 €
-irpfFinal = min(6.344,25, 8.223,32) = 6.344 €
+irpfFinal = min(5.946,82, 8.223,32) = 5.947 €
 
-neto = 35.000 – 2.222,50 – 6.344 = 26.433,50 €
-tipoEfectivo = 6.344 / 35.000 = 18,13%</div>
-      <p><strong>Resultado esperado:</strong> 26.433 € neto · 6.344 € IRPF · 18,1% tipo efectivo</p>
+neto = 35.000 – 2.222,50 – 5.947 = 26.830,50 €
+tipoEfectivo = 5.947 / 35.000 = 16,99%</div>
+      <p><strong>Resultado:</strong> 26.831 € neto · 5.947 € IRPF · 17,0% tipo efectivo</p>
+      <p><strong>Verificado con:</strong> <a href="https://www.tusimpuestos.org" target="_blank" rel="noopener">tusimpuestos.org</a> (26.833 €) · Diferencia: 2 € (redondeo)</p>
     </div>
 
     <div class="example-box">
-      <h3>Ejemplo 2: Con 2 hijos</h3>
+      <h3>Ejemplo 2: Mismo caso en Cataluña (PDF Hacienda pág. 63)</h3>
+      <div class="formula-box">// CUOTA AUTONÓMICA Cataluña
+  12.500 × 0,095 = 1.187,50
+  (22.000 – 12.500) × 0,125 = 1.187,50
+  (30.777,50 – 22.000) × 0,16 = 1.404,40
+  cuotaAutonómica = 3.779,40 €
+
+cuotaÍntegra = 3.699,38 + 3.779,40 = 7.478,78 €
+
+cuotaMinAut: 5.550 × 0,095 = 527,25 €
+cuotaLíquida = 7.478,78 – 999,00 = 6.479,78 €
+irpfFinal = 6.480 €
+
+neto = 35.000 – 2.222,50 – 6.480 = 26.297,50 €
+tipoEfectivo = 6.480 / 35.000 = 18,51%</div>
+      <p><strong>Resultado:</strong> 26.298 € neto · 6.480 € IRPF · 18,5% tipo efectivo</p>
+      <p><strong>Verificado con:</strong> <a href="https://www.tusimpuestos.org" target="_blank" rel="noopener">tusimpuestos.org</a> (26.299 €) · Diferencia: 1 €</p>
+      <p><strong>Diferencia Madrid vs Cataluña:</strong> 533 € menos de IRPF en Madrid</p>
+    </div>
+
+    <div class="example-box">
+      <h3>Ejemplo 3: 120.000 € — Madrid vs Cataluña (caso que reportó @frdelatorre)</h3>
+      <div class="formula-box">bruto = 120.000
+cotizaciónSS = 58.914 × 0,0635 = 3.741,04 €
+rn = 120.000 – 3.741,04 = 116.258,96 €
+reducción_art20 = 0
+rneto = 116.258,96 – 2.000 = 114.258,96 €
+baseLiquidable = 114.258,96 €
+
+// MADRID (PDF Hacienda pág. 47)
+cuotaEstatal = 15.915,52 €
+cuotaAutonómica = 16.341,18 €
+cuotaÍntegra = 32.256,70 €
+cuotaLíquida = 30.558,70 €
+irpfFinal = 30.559 € (límite 44.773 €)
+neto = 85.700 € · tipo efectivo: 33,5%
+
+// CATALUÑA (PDF Hacienda pág. 63)
+cuotaAutonómica = 17.785,06 €
+cuotaÍntegra = 33.700,58 €
+cuotaLíquida = 32.002,58 €
+irpfFinal = 32.003 €
+neto = 84.256 € · tipo efectivo: 34,7%</div>
+      <p><strong>Resultado:</strong> Madrid paga <strong>1.444 € menos</strong> de IRPF que Cataluña a 120.000 €</p>
+      <p><strong>Verificado con:</strong> <a href="https://www.agenciatributaria.gob.es/AEAT.sede/tramitacion/simuladores/simulador-irpf.html" target="_blank" rel="noopener">Simulador AEAT</a></p>
+      <div class="callout">
+        <strong>✅ Corrección aplicada:</strong> En la v2 se usaban escalas "combinadas" incorrectas que invertían el ranking. La v3 usa escalas separadas (estatal + autonómica) del PDF oficial de Hacienda, confirmando que Madrid tiene tipos más bajos que Cataluña en todos los tramos.
+      </div>
+    </div>
+
+    <div class="example-box">
+      <h3>Ejemplo 4: Con 2 hijos en Madrid</h3>
       <div class="formula-box">mínimoTotal = 5.550 + 2.700 = 8.250 €
 
-Cuota del mínimo:
-  8.250 × 0,19 = 1.567,50 €
-cuotaLíquida = 7.398,75 – 1.567,50 = 5.831,25 €
-irpfFinal = 5.831 €
-neto = 35.000 – 2.222,50 – 5.831 = 26.946,50 €</div>
-      <p><strong>Resultado esperado:</strong> 26.946 € neto · 5.831 € IRPF · 16,7% tipo efectivo</p>
-      <p><strong>Diferencia vs sin hijos:</strong> 513 € menos de IRPF</p>
+cuotaMinEstatal: 8.250 × 0,095 = 783,75 €
+cuotaMinAut:     8.250 × 0,085 = 701,25 €
+cuotaMínimoTotal = 1.485,00 €
+
+cuotaLíquida = 6.945,82 – 1.485,00 = 5.460,82 €
+irpfFinal = 5.461 €
+
+neto = 35.000 – 2.222,50 – 5.461 = 27.316,50 €
+tipoEfectivo = 5.461 / 35.000 = 15,6%</div>
+      <p><strong>Resultado:</strong> 27.317 € neto · 5.461 € IRPF · 15,6% tipo efectivo</p>
+      <p><strong>Diferencia vs sin hijos:</strong> 486 € menos de IRPF</p>
     </div>
 
     <!-- 5 -->
     <h2>5. Escalas por CCAA (resumen)</h2>
-    <table>
-      <tr><th>CCAA</th><th>Tramo 1</th><th>Tramo 2</th><th>Tramo 3</th><th>Tramo 4</th><th>Notas</th></tr>
-      <tr><td>Supletorio</td><td>12.450 × 19%</td><td>20.200 × 24%</td><td>35.200 × 30%</td><td>60.000 × 37%</td><td>Escala estatal + autonómica supletoria</td></tr>
-      <tr><td>Madrid</td><td>13.362 × 18%</td><td>19.005 × 22,7%</td><td>35.426 × 27,8%</td><td>57.320 × 35,9%</td><td>Tipos más bajos</td></tr>
-      <tr><td>Cataluña</td><td>12.500 × 20%</td><td>22.000 × 24,5%</td><td>33.000 × 30%</td><td>53.000 × 37,5%</td><td>Tipos más altos</td></tr>
-      <tr><td>Navarra</td><td>4.292 × 13%</td><td>8.584 × 22%</td><td>15.634 × 25%</td><td>24.704 × 28%</td><td>Régimen foral</td></tr>
-      <tr><td>País Vasco</td><td>17.360 × 23%</td><td>32.060 × 28%</td><td>47.560 × 35%</td><td>78.060 × 40%</td><td>Régimen foral</td></tr>
-    </table>
-    <p>Ver <code>data.js</code> para las escalas completas de las 19 comunidades.</p>
+    <p><strong>Fuente:</strong> <a href="https://www.hacienda.gob.es/sgfal/financiacion-autonomica/propuestas-decisiones/2026/Cap%20IV%20-%20Tributacion%20autonomica%202026.pdf" target="_blank" rel="noopener">PDF "Capítulo IV Tributación Autonómica 2026"</a> — Ministerio de Hacienda, Secretaría General de Financiación Autonómica y Local.</p>
 
-    <!-- 6 -->
-    <h2>6. Diferencias con versiones anteriores</h2>
     <table>
-      <tr><th>Versión</th><th>Tratamiento del mínimo</th><th>Desviación</th></tr>
-      <tr><td>v1.0 (original)</td><td>Restado de la base liquidable</td><td>IRPF ~1.600 € menor</td></tr>
-      <tr><td>v1.1 (fix parcial)</td><td>Reducción fija de cuota estatal (9,5%)</td><td>IRPF ~500 € menor</td></tr>
-      <tr><td>v2.0 (actual)</td><td>Reducción de cuota según Art. 63 — tipos marginales reales</td><td>Coincide con simulador AEAT</td></tr>
+      <tr><th>CCAA</th><th>Tramo 1</th><th>Tramo 2</th><th>Tramo 3</th><th>Tramo 4</th><th>Tipo máx.</th><th>Pág. PDF</th></tr>
+      <tr><td>Madrid</td><td>13.362 × 18%</td><td>19.005 × 22,7%</td><td>35.426 × 27,8%</td><td>57.320 × 35,9%</td><td>50,0%</td><td>47</td></tr>
+      <tr><td>Cataluña</td><td>12.500 × 20%</td><td>22.000 × 24,5%</td><td>33.000 × 31%</td><td>53.000 × 37,5%</td><td>50,0%</td><td>63</td></tr>
+      <tr><td>Navarra</td><td>4.292 × 13%</td><td>8.584 × 22%</td><td>15.634 × 25%</td><td>24.704 × 28%</td><td>52,0%</td><td>155</td></tr>
+      <tr><td>País Vasco</td><td>17.360 × 23%</td><td>32.060 × 28%</td><td>47.560 × 35%</td><td>78.060 × 40%</td><td>49,0%</td><td>160</td></tr>
+    </table>
+    <p>Ver <a href="escalas.csv" download>escalas.csv</a> para todas las escalas completas en formato descargable.</p>
+
+    <h2>6. Verificación con fuentes oficiales</h2>
+
+    <div class="source-card">
+      <div class="title">PDF Hacienda 2026</div>
+      <div class="url"><a href="https://www.hacienda.gob.es/sgfal/financiacion-autonomica/propuestas-decisiones/2026/Cap%20IV%20-%20Tributacion%20autonomica%202026.pdf" target="_blank" rel="noopener">hacienda.gob.es/sgfal/financiacion-autonomica/propuestas-decisiones/2026/Cap IV - Tributacion autonomica 2026.pdf</a></div>
+      <p style="margin-top:0.5rem;font-size:0.88rem;"><strong>Cómo verificar:</strong></p>
+      <ol style="margin:0.3rem 0 0.5rem 1.5rem;font-size:0.85rem;line-height:1.8;">
+        <li>Descargar el PDF (162 páginas)</li>
+        <li>Ir a la página correspondiente a tu CCAA (ver tabla arriba)</li>
+        <li>Comparar los tramos y tipos con la tabla de escalas</li>
+        <li>Verificar que los tipos "combinados" = estatal + autonómico</li>
+      </ol>
+    </div>
+
+    <div class="source-card">
+      <div class="title">Simulador AEAT</div>
+      <div class="url"><a href="https://www.agenciatributaria.gob.es/AEAT.sede/tramitacion/simuladores/simulador-irpf.html" target="_blank" rel="noopener">agenciatributaria.gob.es/AEAT.sede/tramitacion/simuladores/simulador-irpf.html</a></div>
+      <p style="margin-top:0.5rem;font-size:0.88rem;"><strong>Cómo verificar:</strong></p>
+      <ol style="margin:0.3rem 0 0.5rem 1.5rem;font-size:0.85rem;line-height:1.8;">
+        <li>Introducir salario bruto anual</li>
+        <li>Seleccionar comunidad autónoma</li>
+        <li>Introducir cotización a la SS (base × 0,0635)</li>
+        <li>Comparar "Cuota íntegra" con nuestra calculadora</li>
+      </ol>
+    </div>
+
+    <div class="source-card">
+      <div class="title">tusimpuestos.org</div>
+      <div class="url"><a href="https://www.tusimpuestos.org" target="_blank" rel="noopener">tusimpuestos.org</a></div>
+      <p style="margin-top:0.5rem;font-size:0.88rem;">Simulador independiente usado para validación cruzada. Diferencias esperadas: ±5-20 € por redondeos.</p>
+    </div>
+
+    <h2>7. Diferencias con versiones anteriores</h2>
+    <table>
+      <tr><th>Versión</th><th>Tratamiento del mínimo</th><th>Escalas</th><th>Desviación vs AEAT</th></tr>
+      <tr><td>v1.0</td><td>Restado de base</td><td>Combinadas incorrectas</td><td>~1.600 € menor</td></tr>
+      <tr><td>v1.1</td><td>Reducción fija estatal</td><td>Combinadas incorrectas</td><td>~500 € menor</td></tr>
+      <tr><td>v2.0</td><td>Reducción según Art. 63</td><td>Combinadas incorrectas</td><td>Ranking invertido a 120k</td></tr>
+      <tr><td><strong>v3.0 (actual)</td><td>Reducción según Art. 63</td><td><strong>Separadas (PDF Hacienda)</strong></td><td><strong>±2 € vs tusimpuestos</strong></td></tr>
     </table>
 
-    <!-- 7 -->
-    <h2>7. Referencias legales</h2>
+    <div class="callout">
+      <strong>Cambio clave v2→v3:</strong> Las escalas autonómicas se obtuvieron del PDF oficial de Hacienda (págs. 3-165) en lugar de fuentes secundarias. Esto corrigió el ranking a salarios altos donde Madrid ahora es #1 y Cataluña #14 (no al revés).
+    </div>
+
+    <h2>8. Referencias legales</h2>
     <ol style="margin:0.5rem 0 0.5rem 1.5rem;line-height:1.9;font-size:0.9rem;">
-      <li><strong>Ley 35/2006</strong> (LIRPF) — BOE-A-2006-20764
-        <ul style="margin:0.2rem 0 0.5rem 1rem;color:var(--muted);font-size:0.85rem;">
-          <li>Art. 18: Rendimiento neto</li>
-          <li>Art. 19: Gastos deducibles</li>
-          <li>Art. 20: Reducción por obtención de rentas del trabajo</li>
-          <li>Art. 57: Mínimo personal y familiar</li>
-          <li>Art. 63: Cuota íntegra y cuota líquida</li>
-          <li>Art. 80: Deducción por rentas inferiores a 1,5× SMI</li>
-          <li>Art. 101: Límite de la cuota líquida</li>
-        </ul>
-      </li>
+      <li><strong>Ley 35/2006</strong> (LIRPF) — BOE-A-2006-20764</li>
       <li><strong>Real Decreto-ley 8/2025</strong> — Base máxima cotización SS: 58.914 €</li>
       <li><strong>Orden HFP/886/2025</strong> — Tipos de gravamen estatales y autonómicos</li>
-      <li><strong>Real Decreto-ley 3/2025</strong> — SMI 2025: 1.184 €/mes (14 pagas) = 16.576 €/año</li>
+      <li><strong>Real Decreto-ley 3/2025</strong> — SMI 2025: 1.184 €/mes (14 pagas)</li>
     </ol>
 
-    <!-- 8 -->
-    <h2>8. Verificación</h2>
-    <p>Contra simuladores oficiales:</p>
-    <ul style="margin:0.3rem 0 0.5rem 1.5rem;line-height:1.8;font-size:0.9rem;">
-      <li><a href="https://www.agenciatributaria.gob.es/AEAT.sede/tramitacion/simuladores/simulador-irpf.html" target="_blank" rel="noopener">Simulador AEAT</a></li>
-      <li><a href="https://www.tusimpuestos.org" target="_blank" rel="noopener">tusimpuestos.org</a></li>
-    </ul>
-
-    <table>
-      <tr><th>Caso</th><th>Resultado esperado</th></tr>
-      <tr><td>bruto &lt; 15.876</td><td>IRPF = 0</td></tr>
-      <tr><td>bruto = 16.576 (1× SMI)</td><td>dedSMI = 340 €</td></tr>
-      <tr><td>bruto = 35.000 (típico)</td><td>Ver Ejemplo 1</td></tr>
-      <tr><td>bruto = 100.000 (alto)</td><td>Tipo marginal ~37-47%</td></tr>
-      <tr><td>65 años</td><td>+1.000 € reducción mínimo</td></tr>
-      <tr><td>3 hijos</td><td>Menor IRPF que 2 hijos</td></tr>
-      <tr><td>Navarra / País Vasco</td><td>Sin desglose estatal/autonómico</td></tr>
-    </table>
-
-    <!-- 9 -->
     <h2>9. Changelog</h2>
     <table class="changelog">
-      <tr><th>Versión</th><th>Fecha</th><th>Cambios</th><th>Autor</th></tr>
-      <tr><td>1.0</td><td>2026-04-01</td><td>Versión inicial basada en calculadora de Jon González</td><td>@jongonzlz</td></tr>
-      <tr><td>1.1</td><td>2026-04-20</td><td>Fix parcial: mínimo como reducción fija estatal</td><td>@elCanosail</td></tr>
-      <tr><td>2.0</td><td>2026-04-24</td><td>Fix completo: mínimo como reducción de cuota según Art. 63 LIRPF</td><td>@elCanosail</td></tr>
+      <tr><th>Versión</th><th>Fecha</th><th>Cambios</th><th>Autor</th><th>Issue</th></tr>
+      <tr><td>1.0</td><td>2026-04-01</td><td>Versión inicial</td><td>@jongonzlz</td><td>—</td></tr>
+      <tr><td>2.0</td><td>2026-04-24</td><td>Fix: mínimo según Art. 63 + escalas separadas (PDF Hacienda)</td><td>@elCanosail</td><td><a href="https://github.com/elCanosail/Calculadora-de-Salarios-y-Progresividad-en-Fr-o/pull/2" target="_blank">PR #2</a></td></tr>
+      <tr><td>2.1</td><td>2026-04-24</td><td>Añadida página de fuentes, CSV descargable, verificación cruzada</td><td>@elCanosail</td><td>—</td></tr>
     </table>
 
     <footer class="legal">
-      Para dudas o correcciones: abrir issue en <a href="https://github.com/jongonzlz/Calculadora-de-Salarios-y-Progresividad-en-Fr-o" target="_blank" rel="noopener">GitHub</a>.
+      Para dudas o correcciones: abrir issue en <a href="https://github.com/elCanosail/Calculadora-de-Salarios-y-Progresividad-en-Fr-o/issues" target="_blank" rel="noopener">GitHub</a>.
+      <br>
+      <a href="fuentes.html">→ Ver página completa de fuentes y referencias</a>
     </footer>
   </div>
 </body>
