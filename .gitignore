@@ -201,6 +201,9 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+
+# Archivos Excel generados por el script para que no saturen GitHub
+*.xlsx
 # Marimo
 marimo/_static/
 marimo/_lsp/
