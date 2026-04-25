@@ -1,8 +1,9 @@
-// data.js v3 — Escalas IRPF 2026 separadas (estatal + autonómica)
+// data.js v3.1 — Escalas IRPF 2026 separadas (estatal + autonómica)
 // Fuente: PDF oficial hacienda.gob.es "Capítulo IV Tributación Autonómica 2026"
 // Cálculo correcto: dos cuotas separadas (estatal + autonómica) sobre la misma base liquidable
+// v3.1: Fix La Rioja (escala propia), Aragón/Baleares/Canarias (tipo máx 0.255)
 
-var CCAA_NAMES = {
+const CCAA_NAMES = {
   supletorio: "Supletorio (estatal)",
   andalucia: "Andalucía",
   aragon: "Aragón",
@@ -44,7 +45,7 @@ const AUTONOMICAS = {
   ],
   aragon: [
     [13072.50, 0.095], [21210, 0.12], [36960, 0.15], [53407.20, 0.192],
-    [70000, 0.215], [90000, 0.235], [175000, 0.255], [Infinity, 0.275]
+    [70000, 0.215], [90000, 0.235], [175000, 0.255], [Infinity, 0.255]
   ],
   asturias: [
     [12450, 0.09], [17707.20, 0.12], [35200, 0.14], [53407.20, 0.192],
@@ -52,11 +53,11 @@ const AUTONOMICAS = {
   ],
   baleares: [
     [10000, 0.09], [18000, 0.1125], [30000, 0.15], [48000, 0.192],
-    [70000, 0.215], [90000, 0.235], [175000, 0.255], [Infinity, 0.275]
+    [70000, 0.215], [90000, 0.235], [175000, 0.255], [Infinity, 0.255]
   ],
   canarias: [
     [13748, 0.09], [19422, 0.115], [35924, 0.14], [53407, 0.192],
-    [70000, 0.215], [90000, 0.235], [175000, 0.255], [Infinity, 0.275]
+    [70000, 0.215], [90000, 0.235], [175000, 0.255], [Infinity, 0.255]
   ],
   cantabria: [
     [13000, 0.085], [21000, 0.11], [35200, 0.145], [60000, 0.20],
@@ -81,7 +82,9 @@ const AUTONOMICAS = {
   galicia: [
     [12985.35, 0.09], [21068.60, 0.1165], [35200, 0.149], [60000, 0.184], [Infinity, 0.225]
   ],
-  la_rioja: null,  // usa supletorio
+  la_rioja: [
+    [12450, 0.095], [20200, 0.12], [35200, 0.15], [60000, 0.192], [Infinity, 0.225]
+  ],
   madrid: [
     [13362.22, 0.085], [19004.63, 0.107], [35425.68, 0.128], [60000, 0.179],
     [90000, 0.205], [175000, 0.235], [Infinity, 0.255]
@@ -113,7 +116,7 @@ const FORALES_ESCALAS = {
 
 // For backwards compatibility: ESCALAS object for app.js scale chart
 // Each entry is the "effective combined" scale (for chart display only)
-var ESCALAS = {};
+const ESCALAS = {};
 (function buildCombinedScales() {
   // Get all CCAA keys
   const allKeys = Object.keys(CCAA_NAMES);
