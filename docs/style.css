@@ -455,24 +455,55 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
   .bar-tooltip { min-width: 170px; font-size: 0.72rem; }
   .bar-tooltip .tt-name { font-size: 0.78rem; }
 
-  /* Tables: scroll + compact */
-  .table-wrap { margin: 0 -0.5rem; padding: 0 0.5rem; }
-  table { font-size: 0.78rem; min-width: 600px; }
-  thead th { padding: 0.5rem 0.35rem; font-size: 0.65rem; }
-  tbody td { padding: 0.4rem 0.35rem; }
+  /* Tables: scroll + compact — no min-width to avoid forced horizontal scroll */
+  .table-wrap { margin: 0 -0.5rem; padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tramos-table-wrapper { margin: 0 -0.5rem; padding: 0 0.5rem; }
+  table { font-size: 0.75rem; width: 100%; }
+  thead th { padding: 0.4rem 0.3rem; font-size: 0.62rem; letter-spacing: 0.02em; }
+  tbody td { padding: 0.35rem 0.3rem; }
 
-  /* Year compare + verify tables */
-  .card table { min-width: 500px; }
+  /* CCAA table: allow scroll for 8 cols but make it as compact as possible */
+  #ccaa-table { min-width: 520px; }
+
+  /* Card tables (verify, year-compare) */
+  .card table { min-width: 440px; }
+
+  /* Tramos table: compact on mobile */
+  .tramos-table { min-width: 420px; }
+  .tramos-table th, .tramos-table td { padding: 0.35rem 0.3rem; font-size: 0.72rem; }
 
   /* SVG chart scales properly */
-  .scale-svg { min-width: 600px; }
+  .scale-svg { min-width: 480px; }
 
   /* Pills scroll */
   .ccaa-pills { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; }
-  .pill { flex-shrink: 0; }
+  .pill { flex-shrink: 0; font-size: 0.75rem; }
 
   /* Audit notice stack */
-  .audit-notice { flex-direction: column; gap: 0.25rem; }
+  .audit-notice { flex-direction: column; gap: 0.25rem; font-size: 0.75rem; }
+
+  /* IPC: compact on mobile */
+  .ipc-big-number { font-size: 2.5rem; }
+  .ipc-label { font-size: 0.8rem; }
+  .ipc-detail-row { font-size: 0.82rem; }
+  .year-btn { padding: 0.25rem 0.6rem; font-size: 0.78rem; }
+  .ipc-timeline-bars { height: 80px; }
+  .ipc-timeline-bar .bar-year { font-size: 0.55rem; }
+
+  /* Radiografía: compact on mobile */
+  .donut-chart { width: 160px; height: 160px; }
+  .donut-legend { font-size: 0.78rem; }
+  .coste-value { font-size: 0.85rem; }
+  .coste-value.total-empresa { font-size: 1rem; }
+  .total-empresa-row { font-size: 1rem; }
+  .coste-mini-info { gap: 0.3rem; }
+  .mini-pill { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
+
+  /* Tramos bars: compact */
+  .tramo-bar-fill { font-size: 0.6rem; }
+  .tramo-label { font-size: 0.72rem; }
+  .tramo-bar-bg { height: 20px; }
+  .tramos-legend { font-size: 0.78rem; }
 }
 
 /* ============================================
@@ -772,6 +803,9 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
 .ipc-timeline-bar.active .bar-fill {
     border: 2px solid var(--primary);
 }
+
+/* Tramos table wrapper — overflow for mobile */
+.tramos-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 /* ============================================
    DESGLOSE POR TRAMOS IRPF (v2)
