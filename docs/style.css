@@ -202,7 +202,7 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
 .delta.negative { color: #dc2626; }
 
 /* Bar chart */
-#bar-chart { width: 100%; height: 320px; }
+#bar-chart { width: 100%; min-height: 200px; /* dynamic height set by JS */ }
 #scale-chart { width: 100%; height: 380px; margin-top: 1rem; }
 
 /* Pills */
@@ -231,8 +231,8 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
 /* Bar chart */
 .bars { display: flex; flex-direction: column; gap: 4px; }
 .bar-row { display: flex; align-items: center; gap: 8px; }
-.bar-label { width: 140px; font-size: 0.75rem; color: var(--muted); text-align: right; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar-track { flex: 1; height: 18px; background: var(--border); border-radius: 4px; overflow: hidden; position: relative; }
+.bar-label { width: 140px; font-size: 0.75rem; color: var(--muted); text-align: right; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1; }
+.bar-track { flex: 1; height: 20px; background: var(--border); border-radius: 4px; overflow: hidden; position: relative; }
 .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
 .bar-val { width: 80px; font-size: 0.8rem; font-weight: 700; text-align: right; flex-shrink: 0; }
 .bar-baseline {

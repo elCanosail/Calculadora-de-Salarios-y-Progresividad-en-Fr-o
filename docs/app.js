@@ -68,6 +68,11 @@
     const baseline = Math.max(0, minNeto - range * 0.3);
     const span = maxNeto - baseline;
 
+    // Dynamic height: each bar row needs ~28px (20px bar + 4px gap + 4px padding)
+    const rowHeight = 28;
+    const chartHeight = sorted.length * rowHeight + 40; // 40px for baseline label + padding
+    barDiv.style.height = chartHeight + 'px';
+
     let html = '<div class="bars">';
     // Baseline indicator
     html += `<div class="bar-baseline">Eje desde ${fmt(Math.round(baseline))}</div>`;
