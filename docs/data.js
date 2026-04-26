@@ -9,7 +9,7 @@
 // IPC (Índice de Precios de Consumo) — base 2021, medias anuales INE
 // Fuente: INE tabla 50934, serie base 2021, medias anuales
 // 2026 estimado extrapolado de variación interanual +3.4% (marzo 2026)
-const ipcData = {
+var ipcData = {
     2012: 92.717,
     2013: 94.023,
     2014: 93.881,
@@ -52,7 +52,7 @@ function calculateIPCAjusted(salary, yearBase, yearTarget) {
 }
 
 // Cotización seguridad social 2026 — trabajador + empresa
-const SS_CONFIG_2026 = {
+var SS_CONFIG_2026 = {
     baseMaxima: 61214.40,
     tipoTrabajador: 0.0635,  // 6.35% contingencias comunes
     tipoMEI: 0.0015,         // 0.15% MEI intergeneracional
@@ -89,7 +89,7 @@ function calculateCosteEmpresa(bruto) {
     };
 }
 
-const CCAA_NAMES = {
+var CCAA_NAMES = {
   supletorio: "Supletorio (estatal)",
   andalucia: "Andalucía",
   aragon: "Aragón",
@@ -113,7 +113,7 @@ const CCAA_NAMES = {
 };
 
 // ─── Escala estatal 2026 (fija, Art. 76 LIRPF) ───
-const ESTATAL = [
+var ESTATAL = [
   [12450, 0.095],
   [20200, 0.12],
   [35200, 0.15],
@@ -124,7 +124,7 @@ const ESTATAL = [
 
 // ─── Escalas autonómicas 2026 (PDF hacienda.gob.es) ───
 // null = usa escala supletoria (= escala estatal duplicada)
-const AUTONOMICAS = {
+var AUTONOMICAS = {
   supletorio: null,  // estatal + estatal
   andalucia: [
     [13000, 0.095], [21100, 0.12], [35200, 0.15], [60000, 0.192], [Infinity, 0.225]
@@ -188,7 +188,7 @@ const AUTONOMICAS = {
 };
 
 // ─── Escalas forales (cuota única, sin desglose) ───
-const FORALES_ESCALAS = {
+var FORALES_ESCALAS = {
   navarra: [
     [4292, 0.13], [8584, 0.22], [15634, 0.25], [24704, 0.28],
     [33984, 0.35], [52600, 0.40], [70000, 0.45], [90000, 0.47],
@@ -202,7 +202,7 @@ const FORALES_ESCALAS = {
 
 // For backwards compatibility: ESCALAS object for app.js scale chart
 // Each entry is the "effective combined" scale (for chart display only)
-const ESCALAS = {};
+var ESCALAS = {};
 (function buildCombinedScales() {
   // Get all CCAA keys
   const allKeys = Object.keys(CCAA_NAMES);
@@ -250,41 +250,41 @@ const ESCALAS = {};
 // Tipos SS 2026: Comunes 28,30% (23,60% emp + 4,70% tra) + Desempleo + FP
 // MEI 2026: 0,80% total (0,67% emp + 0,13% tra) — Orden PJC/297/2026
 // Cuota de solidaridad: RDL 8/2025 + RDL 3/2026 (tramos progresivos sobre exceso de base)
-const BASE_MAX_SS = 61214.40;
-const TIPO_SS_COMUNES_TRA = 0.0470;
-const TIPO_SS_DESEMPLEO_TRA = 0.0155;
-const TIPO_SS_FP_TRA = 0.0010;
-const TIPO_MEI_TRA = 0.0013;
-const TIPO_SS_TRA = TIPO_SS_COMUNES_TRA + TIPO_SS_DESEMPLEO_TRA + TIPO_SS_FP_TRA + TIPO_MEI_TRA; // 0.0648
-const TIPO_SS_EMPRESARIAL_COMUNES = 0.2360;
-const TIPO_SS_EMPRESARIAL_DESEMPLEO = 0.0550; // contrato indefinido
-const TIPO_SS_EMPRESARIAL_FP = 0.0006;
-const TIPO_MEI_EMPRESARIAL = 0.0067;
-const TIPO_SS_EMPRESARIAL = TIPO_SS_EMPRESARIAL_COMUNES + TIPO_SS_EMPRESARIAL_DESEMPLEO + TIPO_SS_EMPRESARIAL_FP + TIPO_MEI_EMPRESARIAL; // 0.2983
+var BASE_MAX_SS = 61214.40;
+var TIPO_SS_COMUNES_TRA = 0.0470;
+var TIPO_SS_DESEMPLEO_TRA = 0.0155;
+var TIPO_SS_FP_TRA = 0.0010;
+var TIPO_MEI_TRA = 0.0013;
+var TIPO_SS_TRA = TIPO_SS_COMUNES_TRA + TIPO_SS_DESEMPLEO_TRA + TIPO_SS_FP_TRA + TIPO_MEI_TRA; // 0.0648
+var TIPO_SS_EMPRESARIAL_COMUNES = 0.2360;
+var TIPO_SS_EMPRESARIAL_DESEMPLEO = 0.0550; // contrato indefinido
+var TIPO_SS_EMPRESARIAL_FP = 0.0006;
+var TIPO_MEI_EMPRESARIAL = 0.0067;
+var TIPO_SS_EMPRESARIAL = TIPO_SS_EMPRESARIAL_COMUNES + TIPO_SS_EMPRESARIAL_DESEMPLEO + TIPO_SS_EMPRESARIAL_FP + TIPO_MEI_EMPRESARIAL; // 0.2983
 
 // Cuota de solidaridad 2026 (solo para bases > BASE_MAX_SS)
 // RDL 3/2026: tramos progresivos sobre el exceso de base
-const SOLIDARIDAD_TRAMOS = [
+var SOLIDARIDAD_TRAMOS = [
   { hasta: BASE_MAX_SS * 0.10, tipo: 0.0115 },  // 0-10% exceso
   { hasta: BASE_MAX_SS * 0.50, tipo: 0.0125 },  // 10%-50% exceso
   { hasta: Infinity, tipo: 0.0146 }               // >50% exceso
 ];
-const SOLIDARIDAD_RATIO_EMPRESARIAL = 5 / 6;
-const SOLIDARIDAD_RATIO_TRABAJADOR = 1 / 6;
+var SOLIDARIDAD_RATIO_EMPRESARIAL = 5 / 6;
+var SOLIDARIDAD_RATIO_TRABAJADOR = 1 / 6;
 
-const GASTOS_FIJOS = 2000;
-const MINIMO_EXENTO = 15876;
-const TOPE_RETENCION = 0.43;
+var GASTOS_FIJOS = 2000;
+var MINIMO_EXENTO = 15876;
+var TOPE_RETENCION = 0.43;
 
-const FORALES = new Set(["navarra", "pais_vasco"]);
+var FORALES = new Set(["navarra", "pais_vasco"]);
 
 // ─── Parámetros por situación familiar (2025/2026) ───
-const MINIMO_EDAD = { normal: 5550, senior: 6550, mayor: 7950 };
-const MINIMO_HIJO = { 0: 0, 1: 2400, 2: 2700, 3: 4000, 4: 4500, 5: 5750 };
-const MINIMO_ASCENDIENTE = 1150;
-const MINIMO_DISCAPACIDAD = { 33: 3000, 65: 9000, 100: 12200 };
+var MINIMO_EDAD = { normal: 5550, senior: 6550, mayor: 7950 };
+var MINIMO_HIJO = { 0: 0, 1: 2400, 2: 2700, 3: 4000, 4: 4500, 5: 5750 };
+var MINIMO_ASCENDIENTE = 1150;
+var MINIMO_DISCAPACIDAD = { 33: 3000, 65: 9000, 100: 12200 };
 
-const DEFAULT_CONFIG = {
+var DEFAULT_CONFIG = {
   edad: "normal",
   hijos: 0,
   ascendientes: 0,
@@ -295,7 +295,7 @@ const DEFAULT_CONFIG = {
 // ─── Parámetros por año fiscal ───
 // Usados para la comparativa año a año (progresividad en frío)
 // Las autonómicas 2024/2025 usan las de 2026 como aproximación (cambios menores)
-const YEAR_PARAMS = {
+var YEAR_PARAMS = {
   2024: {
     baseMaxSS: 55266.00,       // Orden PJC/2024
     tipoSSComunesTra: 0.0470,

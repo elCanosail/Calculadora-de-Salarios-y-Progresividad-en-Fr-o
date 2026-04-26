@@ -495,7 +495,7 @@
 
   // --- Panel: Radiografía del Coste ---
   function renderRadiografia() {
-    const bruto = parseFloat(salaryInput.value) || 0;
+    const bruto = currentSalary || parseFloat(numInput.value) || 0;
     if (bruto <= 0) return;
 
     const coste = calculateCosteEmpresa(bruto);
@@ -589,7 +589,7 @@
   }
 
   function renderIPCComparison() {
-    const bruto = parseFloat(salaryInput.value) || 0;
+    const bruto = currentSalary || parseFloat(numInput.value) || 0;
     if (bruto <= 0) return;
 
     // Use Madrid neto as reference
@@ -656,35 +656,48 @@
 
   // --- Panel: Desglose por Tramos IRPF ---
   function renderTramosDesglose() {
-    const bruto = parseFloat(salaryInput.value) || 0;
+    const bruto = currentSalary || parseFloat(numInput.value) || 0;
     if (bruto <= 0) return;
 
     // Get Madrid scales for display
-    const scales = taxData.madrid || taxData.supletorio;
+    const scales = ESCALAS.madrid || ESCALAS.supletorio;
     if (!scales) return;
 
-    // Calculate which tramos apply
-    const ssTrab = Math.min(bruto, SS_CONFIG_2026.baseMaxima) * SS_CONFIG_2026.tipoTotalTrabajador;
-    const baseLiquidable = Math.max(0, bruto - ssTrab - SS_CONFIG_2026.minimoContribuyente);
+    // Use full calcularIRPF to get accurate breakdown, then derive tramos
+    const config = getConfig();
+    const res = calcularIRPF(bruto, "madrid", config);
 
+    // Build tramos from ESCALAS combined scale
     const tramos = [];
-    let remaining = baseLiquidable;
+    let remaining = res.baseLiq;
     let totalIrpf = 0;
 
     for (let i = 0; i < scales.length && remaining > 0; i++) {
-      const t = scales[i];
-      const tramoBase = Math.min(remaining, t.to - t.from);
-      const estatal = tramoBase * t.rate;
-      const autonomico = tramoBase * t.regionalRate;
-      const total = estatal + autonomico;
+      const s = scales[i];
+      const from = i === 0 ? 0 : scales[i - 1][0];
+      const to = s[0] === Infinity ? 1000000000 : s[0];
+      const rate = s[1];
+      const tramoBase = Math.min(remaining, to - from);
+      const total = tramoBase * rate;
+
+      // Split proportionally based on estatal vs autonómica rates at this bracket
+      let estatalRate = 0;
+      let prevEst = 0;
+      for (const [lim, r] of ESTATAL) {
+        if (from > prevEst && from <= lim) { estatalRate = r; break; }
+        prevEst = lim;
+      }
+      const autonomicoRate = Math.max(0, rate - estatalRate);
+      const estatal = total * (estatalRate / rate);
+      const autonomico = total * (autonomicoRate / rate);
 
       tramos.push({
         num: i + 1,
-        from: t.from,
-        to: t.to,
-        estatalRate: t.rate,
-        autonomicoRate: t.regionalRate,
-        totalRate: t.rate + t.regionalRate,
+        from: from,
+        to: s[0] === Infinity ? Infinity : to,
+        estatalRate: estatalRate,
+        autonomicoRate: autonomicoRate,
+        totalRate: rate,
         base: tramoBase,
         estatal: estatal,
         autonomico: autonomico,
