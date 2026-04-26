@@ -57,6 +57,20 @@
   if (hijosSelect) hijosSelect.addEventListener("change", update);
   if (ascendientesSelect) ascendientesSelect.addEventListener("change", update);
 
+  // --- Highlight table row by CCAA key ---
+  function highlightTableRow(key) {
+    if (!tbody) return;
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const rowKey = tr.querySelector('td:nth-child(2)')?.textContent;
+      if (key && rowKey === CCAA_NAMES[key]) {
+        tr.classList.add('highlighted');
+        tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        tr.classList.remove('highlighted');
+      }
+    });
+  }
+
   // --- Bar chart (pure CSS/HTML) ---
   function renderBarChart(results) {
     const sorted = [...results].sort((a, b) => b.res.neto - a.res.neto);
@@ -73,16 +87,15 @@
     const chartHeight = sorted.length * rowHeight + 40; // 40px for baseline label + padding
     barDiv.style.height = chartHeight + 'px';
 
-    let html = '<div class="bars">';
+    let html = '<div class="bars" style="position:relative">';
     // Baseline indicator
     html += `<div class="bar-baseline">Eje desde ${fmt(Math.round(baseline))}</div>`;
     for (const r of sorted) {
       const pct = span > 0 ? ((r.res.neto - baseline) / span * 100) : 0;
       const delta = r.res.neto - supletorioNeto;
       const color = r.key === "supletorio" ? "var(--accent)" : (delta > 0 ? "#059669" : (delta < 0 ? "#dc2626" : "var(--muted)"));
-      const deltaStr = delta === 0 ? "" : ` (${delta > 0 ? "+" : ""}${delta.toLocaleString("es-ES")}€)`;
       html += `
-        <div class="bar-row" title="${CCAA_NAMES[r.key]}: ${fmt(r.res.neto)}${deltaStr}">
+        <div class="bar-row" data-key="${r.key}" title="">
           <div class="bar-label">${CCAA_NAMES[r.key]}</div>
           <div class="bar-track">
             <div class="bar-fill" style="width:${pct}%;background:${color}"></div>
@@ -90,8 +103,73 @@
           <div class="bar-val">${fmt(r.res.neto)}</div>
         </div>`;
     }
+    // Tooltip (single, positioned by JS)
+    html += '<div class="bar-tooltip" id="bar-tooltip"></div>';
     html += '</div>';
     barDiv.innerHTML = html;
+
+    // Bind click/tap to show tooltip + highlight table row
+    const tooltip = document.getElementById('bar-tooltip');
+    let activeKey = null;
+
+    barDiv.querySelectorAll('.bar-row').forEach(row => {
+      row.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const key = row.dataset.key;
+        if (activeKey === key) {
+          // Deselect
+          activeKey = null;
+          tooltip.classList.remove('visible');
+          barDiv.querySelectorAll('.bar-row').forEach(r => r.classList.remove('selected'));
+          highlightTableRow(null);
+          return;
+        }
+        activeKey = key;
+        barDiv.querySelectorAll('.bar-row').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+        highlightTableRow(key);
+
+        // Find result for this key
+        const r = results.find(r => r.key === key);
+        const delta = r.res.neto - supletorioNeto;
+        const deltaClass = delta > 0 ? 'positive' : (delta < 0 ? 'negative' : '');
+        const deltaStr = r.key === 'supletorio' ? '' : `<span class="tt-delta ${deltaClass}">${delta > 0 ? '+' : ''}${delta.toLocaleString('es-ES')}€</span>`;
+        tooltip.innerHTML = `<div class="tt-name">${CCAA_NAMES[r.key]}</div>
+          <div class="tt-row"><span class="tt-label">Neto</span><span class="tt-val">${fmt(r.res.neto)}</span></div>
+          <div class="tt-row"><span class="tt-label">IRPF</span><span class="tt-val">${fmt(r.res.irpfFinal)}</span></div>
+          <div class="tt-row"><span class="tt-label">Tipo ef.</span><span class="tt-val">${fmtPct(r.res.tipoEfectivo)}</span></div>
+          <div class="tt-row"><span class="tt-label">Tipo máx.</span><span class="tt-val">${fmtPct(r.res.tipoMax)}</span></div>
+          <div class="tt-row"><span class="tt-label">Coste lab.</span><span class="tt-val">${fmt(r.res.costeLaboral)}</span></div>
+          ${deltaStr ? '<div class="tt-row"><span class="tt-label">vs Supletorio</span>' + deltaStr + '</div>' : ''}`;
+
+        // Position tooltip
+        const rect = row.getBoundingClientRect();
+        const chartRect = barDiv.getBoundingClientRect();
+        const top = rect.top - chartRect.top + rect.height / 2;
+        const left = rect.right - chartRect.left + 8;
+        // If tooltip would overflow right, show on left
+        tooltip.style.top = top + 'px';
+        tooltip.style.transform = 'translateY(-50%)';
+        if (left + 220 > barDiv.clientWidth) {
+          tooltip.style.left = 'auto';
+          tooltip.style.right = (barDiv.clientWidth - (rect.left - chartRect.left) + 8) + 'px';
+        } else {
+          tooltip.style.left = left + 'px';
+          tooltip.style.right = 'auto';
+        }
+        tooltip.classList.add('visible');
+      });
+    });
+
+    // Click outside closes tooltip
+    document.addEventListener('click', () => {
+      if (activeKey) {
+        activeKey = null;
+        tooltip.classList.remove('visible');
+        barDiv.querySelectorAll('.bar-row').forEach(r => r.classList.remove('selected'));
+        highlightTableRow(null);
+      }
+    });
   }
 
   // --- Table ---

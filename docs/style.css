@@ -230,11 +230,44 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
 
 /* Bar chart */
 .bars { display: flex; flex-direction: column; gap: 4px; }
-.bar-row { display: flex; align-items: center; gap: 8px; }
+.bar-row { display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.15s; border-radius: 4px; padding: 1px 4px; }
+.bar-row:hover { background: rgba(15,23,42,0.04); }
+.bar-row.selected { background: rgba(59,130,246,0.08); outline: 1.5px solid var(--accent); }
 .bar-label { width: 140px; font-size: 0.75rem; color: var(--muted); text-align: right; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1; }
 .bar-track { flex: 1; height: 20px; background: var(--border); border-radius: 4px; overflow: hidden; position: relative; }
 .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+.bar-row:hover .bar-fill { filter: brightness(1.12); }
+
+/* Table row highlight */
+#ccaa-table tbody tr.highlighted {
+  background: rgba(59,130,246,0.10) !important;
+  outline: 1.5px solid var(--accent);
+  outline-offset: -1.5px;
+}
 .bar-val { width: 80px; font-size: 0.8rem; font-weight: 700; text-align: right; flex-shrink: 0; }
+/* Tooltip */
+.bar-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  background: #0f172a;
+  color: #f1f5f9;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  min-width: 200px;
+  pointer-events: none;
+}
+.bar-tooltip.visible { display: block; }
+.bar-tooltip .tt-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+.bar-tooltip .tt-row { display: flex; justify-content: space-between; gap: 12px; }
+.bar-tooltip .tt-label { color: #94a3b8; }
+.bar-tooltip .tt-val { font-weight: 600; }
+.bar-tooltip .tt-delta.positive { color: #34d399; }
+.bar-tooltip .tt-delta.negative { color: #f87171; }
+
 .bar-baseline {
   font-size: 0.65rem;
   color: var(--muted);
@@ -402,6 +435,8 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
   #bar-chart, #scale-chart { height: auto; }
   .bar-label { width: 90px; font-size: 0.65rem; }
   .bar-val { width: 65px; font-size: 0.7rem; }
+  .bar-tooltip { min-width: 170px; font-size: 0.72rem; }
+  .bar-tooltip .tt-name { font-size: 0.78rem; }
 
   /* Tables: scroll + compact */
   .table-wrap { margin: 0 -0.5rem; padding: 0 0.5rem; }
