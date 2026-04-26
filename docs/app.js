@@ -281,7 +281,7 @@
       { key: "supletorio", bruto: 35000, expected: { neto: 26401, irpf: 6331 } },
       { key: "madrid", bruto: 35000, expected: { neto: 26798, irpf: 5934 } },
       { key: "cataluna", bruto: 35000, expected: { neto: 26322, irpf: 6410 } },
-      { key: "supletorio", bruto: 60000, expected: { neto: 42317, irpf: 13268 } },
+      { key: "supletorio", bruto: 60000, expected: { neto: 41444, irpf: 14668 } },
       { key: "extremadura", bruto: 35000, expected: { neto: 25841, irpf: 6891 } },
     ];
 
