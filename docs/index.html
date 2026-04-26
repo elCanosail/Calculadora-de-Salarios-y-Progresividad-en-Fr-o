@@ -14,7 +14,7 @@
   <meta name="twitter:description" content="Calculadora interactiva: escalas IRPF 2026, MEI, solidaridad, coste laboral.">
   <link rel="canonical" href="https://calculadorairpf.vercel.app/">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=20">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self'; connect-src 'self'; font-src 'self';">
 
 <!-- deploy: 1777245573 -->
@@ -110,7 +110,7 @@
     <!-- Panel: Comparativa IPC -->
     <section class="section" id="ipc-section">
       <h2>📉 Poder adquisitivo perdido</h2>
-      <p class="section-desc">Tu salario ajustado por inflación vs. años anteriores</p>
+      <p class="section-desc">Cuánto poder adquisitivo has perdido desde el año que seleccionas hasta hoy</p>
       <div class="card">
         <div class="ipc-controls">
           <label>Comparar con:</label>
@@ -119,15 +119,15 @@
         <div class="ipc-result" id="ipc-result">
           <div class="ipc-main" id="ipc-main-display">
             <div class="ipc-big-number" id="ipc-perdida">—</div>
-            <div class="ipc-label">pérdida anual por inflación</div>
+            <div class="ipc-label">pérdida acumulada por inflación</div>
           </div>
           <div class="ipc-details">
             <div class="ipc-detail-row">
-              <span>Tu salario hoy:</span>
+              <span>Tu salario hoy (€ de 2026):</span>
               <strong id="ipc-salario-actual">—</strong>
             </div>
             <div class="ipc-detail-row">
-              <span>Equivalente en <span id="ipc-ano-base">2019</span>:</span>
+              <span>Equivalente en € de <span id="ipc-ano-base">2019</span>:</span>
               <strong id="ipc-salario-ajustado">—</strong>
             </div>
             <div class="ipc-detail-row ipc-source">
@@ -241,7 +241,7 @@
     </div>
   </footer>
 
-  <script src="data.js?v=19"></script>
-  <script src="app.js?v=24"></script>
+  <script src="data.js?v=20"></script>
+  <script src="app.js?v=25"></script>
 </body>
 </html>

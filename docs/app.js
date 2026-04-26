@@ -560,7 +560,7 @@
         <div class="coste-row"><span class="coste-label">💰 Tu neto anual</span><span class="coste-value neto">${fmt(neto)}</span></div>
         <div class="coste-row"><span class="coste-label">🏛️ IRPF retenido</span><span class="coste-value irpf">${fmt(irpf)}</span></div>
         <div class="coste-row"><span class="coste-label">🛡️ SS trabajador (${coste.ssTrabajadorPercent.toFixed(2)}%)</span><span class="coste-value ss-trab">${fmt(coste.ssTrabajador)}</span></div>
-        <div class="coste-row total-row"><span class="coste-label">📄 Bruto (coste para ti)</span><span class="coste-value bruto">${fmt(bruto)}</span></div>
+        <div class="coste-row total-row"><span class="coste-label">📄 Salario bruto</span><span class="coste-value bruto">${fmt(bruto)}</span></div>
         <div class="separator"></div>
         <div class="coste-row empresa-row"><span class="coste-label">🏢 SS empresa (+${coste.ssEmpresaPercent.toFixed(1)}%)</span><span class="coste-value ss-empresa">${fmt(coste.ssEmpresa)}</span></div>
         <div class="coste-row total-empresa-row"><span class="coste-label">💸 Coste TOTAL empresa</span><span class="coste-value total-empresa">${fmt(coste.costeTotal)}</span></div>
@@ -603,7 +603,7 @@
     // Main display
     const perdidaEl = document.getElementById("ipc-perdida");
     if (perdidaEl) {
-      perdidaEl.textContent = (isGanancia ? "+" : "−") + fmt(Math.abs(perdida)) + "/año";
+      perdidaEl.textContent = (isGanancia ? "+" : "−") + fmt(Math.abs(perdida));
       perdidaEl.className = "ipc-big-number " + (isGanancia ? "ganancia" : "");
     }
 
@@ -625,7 +625,7 @@
         return r ? Math.abs(r.perdidaAdquisitivo) : 0;
       }));
 
-      let html = '<div class="ipc-timeline-title">Pérdida acumulada por año de referencia</div>';
+      let html = '<div class="ipc-timeline-title">Pérdida acumulada desde cada año hasta 2026</div>';
       html += '<div class="ipc-timeline-bars">';
 
       for (const year of years) {
@@ -635,7 +635,7 @@
         const isActive = year === selectedIPCYear;
         const color = r.perdidaAdquisitivo > 0 ? "#ef4444" : "#10b981";
 
-        html += `<div class="ipc-timeline-bar ${isActive ? 'active' : ''}" data-year="${year}" title="${year}: ${fmt(r.perdidaAdquisitivo)}/año">`;
+        html += `<div class="ipc-timeline-bar ${isActive ? 'active' : ''}" data-year="${year}" title="${year}: ${fmt(r.perdidaAdquisitivo)}">`;
         html += `<div class="bar-fill" style="height:${Math.max(heightPct, 2)}%;background:${color}"></div>`;
         html += `<div class="bar-year">${year}</div>`;
         html += `</div>`;
