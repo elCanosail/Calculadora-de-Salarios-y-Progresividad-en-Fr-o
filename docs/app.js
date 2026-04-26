@@ -184,20 +184,31 @@
           <div class="tt-row"><span class="tt-label">Coste lab.</span><span class="tt-val">${fmt(r.res.costeLaboral)}</span></div>
           ${deltaStr ? '<div class="tt-row"><span class="tt-label">vs Supletorio</span>' + deltaStr + '</div>' : ''}`;
 
-        // Position tooltip
-        const rect = row.getBoundingClientRect();
-        const chartRect = barDiv.getBoundingClientRect();
-        const top = rect.top - chartRect.top + rect.height / 2;
-        const left = rect.right - chartRect.left + 8;
-        // If tooltip would overflow right, show on left
-        tooltip.style.top = top + 'px';
-        tooltip.style.transform = 'translateY(-50%)';
-        if (left + 220 > barDiv.clientWidth) {
-          tooltip.style.left = 'auto';
-          tooltip.style.right = (barDiv.clientWidth - (rect.left - chartRect.left) + 8) + 'px';
-        } else {
-          tooltip.style.left = left + 'px';
+        // Position tooltip - responsive: centered on mobile, side on desktop
+        const isMobile = window.innerWidth <= 640;
+        if (isMobile) {
+          // Mobile: center tooltip below/above the bar
+          tooltip.style.position = 'fixed';
+          tooltip.style.top = '50%';
+          tooltip.style.left = '50%';
+          tooltip.style.transform = 'translate(-50%, -50%)';
           tooltip.style.right = 'auto';
+        } else {
+          // Desktop: position to the side
+          const rect = row.getBoundingClientRect();
+          const chartRect = barDiv.getBoundingClientRect();
+          const top = rect.top - chartRect.top + rect.height / 2;
+          const left = rect.right - chartRect.left + 8;
+          tooltip.style.position = 'absolute';
+          tooltip.style.top = top + 'px';
+          tooltip.style.transform = 'translateY(-50%)';
+          if (left + 220 > barDiv.clientWidth) {
+            tooltip.style.left = 'auto';
+            tooltip.style.right = (barDiv.clientWidth - (rect.left - chartRect.left) + 8) + 'px';
+          } else {
+            tooltip.style.left = left + 'px';
+            tooltip.style.right = 'auto';
+          }
         }
         tooltip.classList.add('visible');
       });
