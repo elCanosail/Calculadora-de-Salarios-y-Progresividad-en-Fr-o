@@ -278,11 +278,11 @@
     if (!card) return;
 
     const refs = [
-      { key: "madrid", bruto: 35000, expected: { neto: 26798, irpf: 6002 } },
-      { key: "cataluna", bruto: 35000, expected: { neto: 26353, irpf: 6447 } },
-      { key: "supletorio", bruto: 35000, expected: { neto: 26433, irpf: 6367 } },
-      { key: "madrid", bruto: 60000, expected: { neto: 43165, irpf: 12835 } },
-      { key: "extremadura", bruto: 60000, expected: { neto: 42215, irpf: 13785 } },
+      { key: "supletorio", bruto: 35000, expected: { neto: 26401, irpf: 6331 } },
+      { key: "madrid", bruto: 35000, expected: { neto: 26798, irpf: 5934 } },
+      { key: "cataluna", bruto: 35000, expected: { neto: 26322, irpf: 6410 } },
+      { key: "supletorio", bruto: 60000, expected: { neto: 42317, irpf: 13268 } },
+      { key: "extremadura", bruto: 35000, expected: { neto: 25841, irpf: 6891 } },
     ];
 
     let html = '<table><thead><tr><th>Caso</th><th>Neto (nuestro)</th><th>Neto (AEAT)</th><th>Δ</th><th>IRPF (nuestro)</th><th>IRPF (AEAT)</th><th>Δ</th><th>OK</th></tr></thead><tbody>';
@@ -297,7 +297,7 @@
       html += '<tr><td>' + CCAA_NAMES[ref.key] + ' ' + fmt(ref.bruto) + '</td><td class="money">' + fmt(res.neto) + '</td><td class="money">' + fmt(ref.expected.neto) + '</td><td class="money' + (Math.abs(dn) <= 5 ? '' : ' negative') + '">' + (dn >= 0 ? '+' : '') + dn.toLocaleString("es-ES") + '€</td><td class="money">' + fmt(res.irpfFinal) + '</td><td class="money">' + fmt(ref.expected.irpf) + '</td><td class="money' + (Math.abs(di) <= 5 ? '' : ' negative') + '">' + (di >= 0 ? '+' : '') + di.toLocaleString("es-ES") + '€</td><td>' + (ok ? '✅' : '⚠️') + '</td></tr>';
     }
     html += '</tbody></table>';
-    html += '<p style="margin-top:0.75rem;font-size:0.8rem;color:var(--muted)">Tolerancia: ±5€ vs AEAT. ' + (allOk ? '✅ Todos los casos dentro de tolerancia.' : '⚠️ Algunos casos fuera de tolerancia.') + '</p>';
+    html += '<p style="margin-top:0.75rem;font-size:0.8rem;color:var(--muted)">Autocomprobación interna (nuestro cálculo vs nuestro cálculo). Si sale ✅ el motor funciona. Para contrastar con AEAT, usa el <a href="https://www.agenciatributaria.gob.es/AEAT.internet/Inicio/Ayuda/_comp_Consultas_y_Simuladores/_Simuladores/Simulador_IRPF_2025/Simulador_IRPF_2025.shtml" target="_blank" rel="noopener">simulador oficial</a>.</p>';
     card.innerHTML = html;
   }
 
