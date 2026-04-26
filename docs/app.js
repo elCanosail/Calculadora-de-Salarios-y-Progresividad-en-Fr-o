@@ -261,7 +261,7 @@
     if (!notice) return;
     const res = calcularIRPF(currentSalary, "madrid");
     const parts = [];
-    parts.push("SS: " + fmt(res.cotSS) + " (6.35% comunes) + MEI: " + fmt(Math.round(res.baseSS * 0.0015)) + " (0.15%)");
+    parts.push("SS: " + fmt(res.cotSS) + " (6.35% comunes) + MEI: " + fmt(Math.round(res.baseSS * 0.0013)) + " (0.13%)");
     if (res.cotSolidaridad > 0) {
       parts.push("Solidaridad: " + fmt(res.cotSolidaridad) + " (1/6 trabajador)");
     }

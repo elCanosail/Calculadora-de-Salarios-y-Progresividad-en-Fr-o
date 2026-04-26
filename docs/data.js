@@ -162,18 +162,24 @@ const ESCALAS = {};
 })();
 
 // ─── Parámetros SS 2026 ───
-// Base máxima: Real Decreto-ley 8/2025 (actualizado 2026: 61.214,40 €/año)
-// MEI: Real Decreto-ley 2/2023 (0.15% trabajador, 0.75% empresarial en 2026)
-// Cuota de solidaridad: RDL 8/2025 (tramos progresivos sobre exceso de base)
+// Base máxima: Orden PJC/297/2026 (5.101,20 €/mes = 61.214,40 €/año)
+// Tipos SS 2026: Comunes 28,30% (23,60% emp + 4,70% tra) + Desempleo + FP
+// MEI 2026: 0,80% total (0,67% emp + 0,13% tra) — Orden PJC/297/2026
+// Cuota de solidaridad: RDL 8/2025 + RDL 3/2026 (tramos progresivos sobre exceso de base)
 const BASE_MAX_SS = 61214.40;
-const TIPO_SS_COMUNES_TRA = 0.047;
+const TIPO_SS_COMUNES_TRA = 0.0470;
 const TIPO_SS_DESEMPLEO_TRA = 0.0155;
-const TIPO_SS_FP_TRA = 0.001;
-const TIPO_MEI_TRA = 0.0015;
-const TIPO_SS_TRA = TIPO_SS_COMUNES_TRA + TIPO_SS_DESEMPLEO_TRA + TIPO_SS_FP_TRA + TIPO_MEI_TRA; // 0.065
-const TIPO_SS_EMPRESARIAL = 0.236 + 0.058 + 0.0006 + 0.0075; // comunes + desempleo + FP + MEI
+const TIPO_SS_FP_TRA = 0.0010;
+const TIPO_MEI_TRA = 0.0013;
+const TIPO_SS_TRA = TIPO_SS_COMUNES_TRA + TIPO_SS_DESEMPLEO_TRA + TIPO_SS_FP_TRA + TIPO_MEI_TRA; // 0.0648
+const TIPO_SS_EMPRESARIAL_COMUNES = 0.2360;
+const TIPO_SS_EMPRESARIAL_DESEMPLEO = 0.0550; // contrato indefinido
+const TIPO_SS_EMPRESARIAL_FP = 0.0006;
+const TIPO_MEI_EMPRESARIAL = 0.0067;
+const TIPO_SS_EMPRESARIAL = TIPO_SS_EMPRESARIAL_COMUNES + TIPO_SS_EMPRESARIAL_DESEMPLEO + TIPO_SS_EMPRESARIAL_FP + TIPO_MEI_EMPRESARIAL; // 0.2983
 
 // Cuota de solidaridad 2026 (solo para bases > BASE_MAX_SS)
+// RDL 3/2026: tramos progresivos sobre el exceso de base
 const SOLIDARIDAD_TRAMOS = [
   { hasta: BASE_MAX_SS * 0.10, tipo: 0.0115 },  // 0-10% exceso
   { hasta: BASE_MAX_SS * 0.50, tipo: 0.0125 },  // 10%-50% exceso
