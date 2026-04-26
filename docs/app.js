@@ -265,7 +265,7 @@
     if (res.cotSolidaridad > 0) {
       parts.push("Solidaridad: " + fmt(res.cotSolidaridad) + " (1/6 trabajador)");
     }
-    parts.push("Base max. SS: " + fmt(Math.round(BASE_MAX_SS)) + " EUR/anio");
+    parts.push("Base m\u00e1x. SS: " + fmt(Math.round(BASE_MAX_SS)) + " \u20ac/a\u00f1o");
     notice.innerHTML = parts.join(" · ");
   }
 
