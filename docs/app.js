@@ -52,7 +52,7 @@
   slider.addEventListener("input", () => setSalary(+slider.value));
   numInput.addEventListener("input", () => setSalary(+numInput.value));
 
-  // Config change triggers update
+  // --- Config change triggers update ---
   if (edadSelect) edadSelect.addEventListener("change", update);
   if (hijosSelect) hijosSelect.addEventListener("change", update);
   if (ascendientesSelect) ascendientesSelect.addEventListener("change", update);
@@ -101,13 +101,15 @@
       const deltaClass = delta > 0 ? "positive" : (delta < 0 ? "negative" : "");
       const deltaStr = r.key === "supletorio" ? "—" : `<span class="delta ${deltaClass}">${fmtDelta(delta)}</span>`;
 
-      html += `<tr class="${rowClass}">
+      const costeLabPct = r.res.bruto > 0 ? (r.res.costeLaboral / r.res.bruto * 100) : 0;
+      html += `<tr class="${rowClass}" title="Coste laboral: ${fmt(r.res.costeLaboral)} (${costeLabPct.toFixed(1)}% del bruto) · SS tra: ${fmt(r.res.cotTra)} · SS emp: ${fmt(r.res.cotEmpresarial)}">
         <td class="pos">${i + 1}</td>
         <td>${CCAA_NAMES[r.key]}</td>
         <td class="money">${fmt(r.res.neto)}</td>
         <td class="money">${fmt(r.res.irpfFinal)}</td>
         <td class="pct">${fmtPct(r.res.tipoEfectivo)}</td>
         <td class="pct">${fmtPct(r.res.tipoMax)}</td>
+        <td class="money" title="${fmt(r.res.cotEmpresarial)} SS empresarial + ${fmt(r.res.bruto)} bruto">${fmt(r.res.costeLaboral)}</td>
         <td>${deltaStr}</td>
       </tr>`;
     });
@@ -254,6 +256,7 @@
     renderTable(results);
     renderScaleChart();
     updateMeiNotice();
+    renderYearComparison();
   }
 
   function updateMeiNotice() {
@@ -269,8 +272,76 @@
     notice.innerHTML = parts.join(" · ");
   }
 
+  // --- Verify with AEAT reference values ---
+  function renderVerify() {
+    const card = document.getElementById("verify-card");
+    if (!card) return;
+
+    const refs = [
+      { key: "madrid", bruto: 35000, expected: { neto: 26798, irpf: 6002 } },
+      { key: "cataluna", bruto: 35000, expected: { neto: 26353, irpf: 6447 } },
+      { key: "supletorio", bruto: 35000, expected: { neto: 26433, irpf: 6367 } },
+      { key: "madrid", bruto: 60000, expected: { neto: 43165, irpf: 12835 } },
+      { key: "extremadura", bruto: 60000, expected: { neto: 42215, irpf: 13785 } },
+    ];
+
+    let html = '<table><thead><tr><th>Caso</th><th>Neto (nuestro)</th><th>Neto (AEAT)</th><th>Δ</th><th>IRPF (nuestro)</th><th>IRPF (AEAT)</th><th>Δ</th><th>OK</th></tr></thead><tbody>';
+
+    let allOk = true;
+    for (const ref of refs) {
+      const res = calcularIRPF(ref.bruto, ref.key, { edad: "normal", hijos: 0, ascendientes: 0, discapacidad: 0, tributacion: "individual" });
+      const dn = res.neto - ref.expected.neto;
+      const di = res.irpfFinal - ref.expected.irpf;
+      const ok = Math.abs(dn) <= 5 && Math.abs(di) <= 5;
+      if (!ok) allOk = false;
+      html += '<tr><td>' + CCAA_NAMES[ref.key] + ' ' + fmt(ref.bruto) + '</td><td class="money">' + fmt(res.neto) + '</td><td class="money">' + fmt(ref.expected.neto) + '</td><td class="money' + (Math.abs(dn) <= 5 ? '' : ' negative') + '">' + (dn >= 0 ? '+' : '') + dn.toLocaleString("es-ES") + '€</td><td class="money">' + fmt(res.irpfFinal) + '</td><td class="money">' + fmt(ref.expected.irpf) + '</td><td class="money' + (Math.abs(di) <= 5 ? '' : ' negative') + '">' + (di >= 0 ? '+' : '') + di.toLocaleString("es-ES") + '€</td><td>' + (ok ? '✅' : '⚠️') + '</td></tr>';
+    }
+    html += '</tbody></table>';
+    html += '<p style="margin-top:0.75rem;font-size:0.8rem;color:var(--muted)">Tolerancia: ±5€ vs AEAT. ' + (allOk ? '✅ Todos los casos dentro de tolerancia.' : '⚠️ Algunos casos fuera de tolerancia.') + '</p>';
+    card.innerHTML = html;
+  }
+
+  // --- Year comparison ---
+  function renderYearComparison() {
+    const table = document.getElementById("year-compare-table");
+    const chart = document.getElementById("year-compare-chart");
+    if (!table) return;
+
+    const config = getConfig();
+    const years = [2024, 2025, 2026];
+    const ccaa = "madrid";
+
+    let html = '<table><thead><tr><th>Año</th><th>Bruto</th><th>SS trab.</th><th>IRPF</th><th>Neto</th><th>Coste laboral</th><th>Tipo ef.</th></tr></thead><tbody>';
+
+    for (const year of years) {
+      const res = calcularIRPFYear(currentSalary, ccaa, year, config);
+      html += '<tr><td><strong>' + year + '</strong></td><td>' + fmt(res.bruto) + '</td><td>' + fmt(res.cotTra) + '</td><td>' + fmt(res.irpfFinal) + '</td><td class="money">' + fmt(res.neto) + '</td><td>' + fmt(res.costeLaboral) + '</td><td>' + fmtPct(res.tipoEfectivo) + '</td></tr>';
+    }
+    html += '</tbody></table>';
+    html += '<p style="margin-top:0.75rem;font-size:0.8rem;color:var(--muted)">Valores para ' + CCAA_NAMES[ccaa] + ' a ' + fmt(currentSalary) + ' bruto.</p>';
+    table.innerHTML = html;
+
+    // Mini bar chart
+    const results = years.map(y => ({ year: y, res: calcularIRPFYear(currentSalary, ccaa, y, config) }));
+    const maxNeto = Math.max(...results.map(r => r.res.neto));
+    const minNeto = Math.min(...results.map(r => r.res.neto));
+    const baseline = Math.max(0, minNeto - (maxNeto - minNeto) * 0.3);
+    const span = maxNeto - baseline;
+
+    let chartHtml = '<div class="bars">';
+    for (const r of results) {
+      const pct = span > 0 ? ((r.res.neto - baseline) / span * 100) : 50;
+      const color = r.year === 2026 ? "var(--accent)" : (r.year === 2025 ? "#059669" : "#64748b");
+      chartHtml += '<div class="bar-row" title="' + r.year + ': ' + fmt(r.res.neto) + '"><div class="bar-label">' + r.year + '</div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div><div class="bar-val">' + fmt(r.res.neto) + '</div></div>';
+    }
+    chartHtml += '</div>';
+    chart.innerHTML = chartHtml;
+  }
+
   // --- Init ---
   renderPills();
+  renderVerify();
+  renderYearComparison();
   setSalary(35000);
 
   // --- Modal FORMULAS.md (v2) ---

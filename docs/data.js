@@ -208,6 +208,60 @@ const DEFAULT_CONFIG = {
   tributacion: "individual"
 };
 
+// ─── Parámetros por año fiscal ───
+// Usados para la comparativa año a año (progresividad en frío)
+// Las autonómicas 2024/2025 usan las de 2026 como aproximación (cambios menores)
+const YEAR_PARAMS = {
+  2024: {
+    baseMaxSS: 55266.00,       // Orden PJC/2024
+    tipoSSComunesTra: 0.0470,
+    tipoSSDesempleoTra: 0.0155,
+    tipoSSFpTra: 0.0010,
+    tipoMeiTra: 0.0,           // sin MEI
+    tipoSSEmpresarialComunes: 0.2360,
+    tipoSSEmpresarialDesempleo: 0.0550,
+    tipoSSEmpresarialFp: 0.0006,
+    tipoMeiEmpresarial: 0.0,
+    solidaridad: false,
+    escalaEstatal: [
+      [12450, 0.095], [20200, 0.12], [35200, 0.15],
+      [60000, 0.185], [300000, 0.225], [Infinity, 0.245]
+    ]
+  },
+  2025: {
+    baseMaxSS: 58914.00,       // Orden PJC/2025
+    tipoSSComunesTra: 0.0470,
+    tipoSSDesempleoTra: 0.0155,
+    tipoSSFpTra: 0.0010,
+    tipoMeiTra: 0.0,           // sin MEI (aplazado)
+    tipoSSEmpresarialComunes: 0.2360,
+    tipoSSEmpresarialDesempleo: 0.0550,
+    tipoSSEmpresarialFp: 0.0006,
+    tipoMeiEmpresarial: 0.0,
+    solidaridad: false,
+    escalaEstatal: [
+      [12450, 0.095], [20200, 0.12], [35200, 0.15],
+      [60000, 0.185], [300000, 0.225], [Infinity, 0.245]
+    ]
+  },
+  2026: {
+    baseMaxSS: 61214.40,       // Orden PJC/297/2026
+    tipoSSComunesTra: 0.0470,
+    tipoSSDesempleoTra: 0.0155,
+    tipoSSFpTra: 0.0010,
+    tipoMeiTra: 0.0013,        // 0.13% trabajador
+    tipoSSEmpresarialComunes: 0.2360,
+    tipoSSEmpresarialDesempleo: 0.0550,
+    tipoSSEmpresarialFp: 0.0006,
+    tipoMeiEmpresarial: 0.0067, // 0.67% empresarial
+    solidaridad: true,
+    escalaEstatal: [
+      [12450, 0.095], [20200, 0.12], [35200, 0.15],
+      [60000, 0.185], [300000, 0.225], [Infinity, 0.245]
+    ]
+  }
+};
+
 // ─── Cálculo de cuota de solidaridad (solo bases > BASE_MAX_SS) ───
 function cuotaSolidaridad(bruto) {
   if (bruto <= BASE_MAX_SS) return { total: 0, empresarial: 0, trabajador: 0 };
@@ -398,6 +452,90 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
     tipoEfectivo: +tipoEfectivo.toFixed(2),
     tipoMax: +(tipoMax * 100).toFixed(1),
     _minimoTotal: Math.round(minimoTotal)
+  };
+}
+
+// ─── Cálculo de IRPF por año (para comparativa año a año) ───
+function calcularIRPFYear(bruto, ccaaKey, year, config) {
+  const yp = YEAR_PARAMS[year];
+  if (!yp) return calcularIRPF(bruto, ccaaKey, config);
+  const { edad = "normal", hijos = 0, ascendientes = 0, discapacidad = 0 } = config || DEFAULT_CONFIG;
+  const brutoPos = Math.max(0, bruto);
+  const baseSS = Math.min(brutoPos, yp.baseMaxSS);
+  const tipoTra = yp.tipoSSComunesTra + yp.tipoSSDesempleoTra + yp.tipoSSFpTra + yp.tipoMeiTra;
+  const tipoEmp = yp.tipoSSEmpresarialComunes + yp.tipoSSEmpresarialDesempleo + yp.tipoSSEmpresarialFp + yp.tipoMeiEmpresarial;
+  const cotSSComun = Math.round(baseSS * tipoTra * 100) / 100;
+  let solidaridad = { total: 0, empresarial: 0, trabajador: 0 };
+  if (yp.solidaridad) {
+    if (brutoPos > yp.baseMaxSS) {
+      const exceso = brutoPos - yp.baseMaxSS;
+      const l1 = yp.baseMaxSS * 0.10, l2 = yp.baseMaxSS * 0.50;
+      const t1 = Math.min(exceso, l1) * 0.0115;
+      const t2 = Math.min(Math.max(0, exceso - l1), l2 - l1) * 0.0125;
+      const t3 = Math.max(0, exceso - l2) * 0.0146;
+      solidaridad = { total: t1+t2+t3, empresarial: (t1+t2+t3)*5/6, trabajador: (t1+t2+t3)/6 };
+    }
+  }
+  const cotTra = Math.round((cotSSComun + solidaridad.trabajador) * 100) / 100;
+  const cotEmpresarial = Math.round((baseSS * tipoEmp + solidaridad.empresarial) * 100) / 100;
+  const costeLaboral = Math.round((brutoPos + cotEmpresarial) * 100) / 100;
+  const rn = Math.max(0, brutoPos - cotTra);
+  let reduccion = 0;
+  if (rn <= 14852) reduccion = 7302;
+  else if (rn <= 17673.52) reduccion = 7302 - 1.75 * (rn - 14852);
+  else if (rn <= 19747.50) reduccion = 2364.34 - 1.14 * (rn - 17673.52);
+  reduccion = Math.max(0, reduccion);
+  const rneto = Math.max(0, rn - GASTOS_FIJOS - reduccion);
+  const minimoPersonal = MINIMO_EDAD[edad] || MINIMO_EDAD.normal;
+  const minimoHijos = MINIMO_HIJO[Math.min(hijos, 5)] || 0;
+  const minimoAscendientes = Math.min(ascendientes, 4) * MINIMO_ASCENDIENTE;
+  const minimoTotal = minimoPersonal + minimoHijos + minimoAscendientes;
+  const baseLiq = Math.max(0, rneto);
+  const estatal = yp.escalaEstatal;
+  let irpfFinal, irpfEstatal, irpfAutonomica, tipoMax;
+  if (FORALES.has(ccaaKey)) {
+    const escala = FORALES_ESCALAS[ccaaKey];
+    const cuota = cuotaIntegra(baseLiq, escala);
+    const cuotaMin = cuotaMinimoPersonal(minimoTotal, baseLiq, escala);
+    const cuotaLiq = Math.max(0, cuota - cuotaMin);
+    let dedSMI = 0;
+    if (brutoPos <= 16576) dedSMI = 340;
+    else if (brutoPos <= 18276) dedSMI = Math.max(0, 340 - 0.20 * (brutoPos - 16576));
+    const cuotaResult = Math.max(0, cuotaLiq - dedSMI);
+    const limiteRet = Math.max(0, (brutoPos - MINIMO_EXENTO) * TOPE_RETENCION);
+    irpfFinal = Math.min(cuotaResult, limiteRet);
+    irpfEstatal = 0; irpfAutonomica = irpfFinal;
+    tipoMax = escala[escala.length - 1][1];
+  } else {
+    const escalaAut = AUTONOMICAS[ccaaKey] || estatal;
+    const cuotaEst = cuotaIntegra(baseLiq, estatal);
+    const cuotaAut = cuotaIntegra(baseLiq, escalaAut);
+    const minEst = cuotaMinimoPersonal(minimoTotal, baseLiq, estatal);
+    const minAut = cuotaMinimoPersonal(minimoTotal, baseLiq, escalaAut);
+    const cuotaLiqEst = Math.max(0, cuotaEst - minEst);
+    const cuotaLiqAut = Math.max(0, cuotaAut - minAut);
+    let dedSMI = 0;
+    if (brutoPos <= 16576) dedSMI = 340;
+    else if (brutoPos <= 18276) dedSMI = Math.max(0, 340 - 0.20 * (brutoPos - 16576));
+    const cuotaLiqTotal = cuotaLiqEst + cuotaLiqAut;
+    const ratioEst = cuotaLiqTotal > 0 ? cuotaLiqEst / cuotaLiqTotal : 0.5;
+    const cuotaResEst = Math.max(0, cuotaLiqEst - dedSMI * ratioEst);
+    const cuotaResAut = Math.max(0, cuotaLiqAut - dedSMI * (1 - ratioEst));
+    const limiteRet = Math.max(0, (brutoPos - MINIMO_EXENTO) * TOPE_RETENCION);
+    irpfEstatal = Math.min(cuotaResEst, limiteRet);
+    irpfAutonomica = Math.min(cuotaResAut, Math.max(0, limiteRet - irpfEstatal));
+    irpfFinal = irpfEstatal + irpfAutonomica;
+    tipoMax = estatal[estatal.length - 1][1] + escalaAut[escalaAut.length - 1][1];
+  }
+  const neto = brutoPos - cotTra - irpfFinal;
+  const tipoEfectivo = brutoPos > 0 ? (irpfFinal / brutoPos * 100) : 0;
+  return {
+    bruto: brutoPos, baseSS: Math.round(baseSS), cotSS: Math.round(cotSSComun),
+    cotTra: Math.round(cotTra), cotEmpresarial: Math.round(cotEmpresarial),
+    costeLaboral: Math.round(costeLaboral), neto: Math.round(neto),
+    irpfFinal: Math.round(irpfFinal), irpfEstatal: Math.round(irpfEstatal),
+    irpfAutonomica: Math.round(irpfAutonomica), tipoEfectivo: +tipoEfectivo.toFixed(2),
+    tipoMax: +(tipoMax * 100).toFixed(1), year: year
   };
 }
 
