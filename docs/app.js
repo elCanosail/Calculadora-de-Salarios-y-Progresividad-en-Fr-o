@@ -247,7 +247,7 @@
         const key = tr.dataset.key;
         if (!key) return;
 
-        const allResults = CCAA_KEYS.map(k => ({ key: k, res: calculate(currentSalary, k, getConfig()) }));
+        const allResults = CCAA_KEYS.map(k => ({ key: k, res: calcularIRPF(currentSalary, k, getConfig()) }));
         highlightBar(key, allResults);
         highlightTableRow(key);
       });
