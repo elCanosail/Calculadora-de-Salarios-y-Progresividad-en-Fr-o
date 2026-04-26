@@ -597,7 +597,8 @@
     const result = calculateIPCAjusted(neto, selectedIPCYear, 2026);
     if (!result) return;
 
-    const perdida = result.perdidaAdquisitivo;
+    const necesitarias = result.salaryAjustado; // lo que necesitarías ganar hoy para mantener poder adquisitivo del año base
+    const perdida = necesitarias - neto; // positivo = pierdes, negativo = ganas
     const isGanancia = perdida < 0;
 
     // Main display
@@ -611,7 +612,8 @@
     if (salarioActual) salarioActual.textContent = fmt(neto);
 
     const salarioAjustado = document.getElementById("ipc-salario-ajustado");
-    if (salarioAjustado) salarioAjustado.textContent = fmt(result.salaryAjustado);
+    if (salarioAjustado) salarioAjustado.textContent = fmt(Math.round(neto * (result.ipcBase / result.ipcTarget)));
+    // Muestra: valor de tu sueldo de hoy en euros del año seleccionado
 
     const anoBase = document.getElementById("ipc-ano-base");
     if (anoBase) anoBase.textContent = selectedIPCYear;
@@ -622,7 +624,7 @@
       const years = Object.keys(ipcData).map(Number).filter(y => y >= 2019 && y <= 2026).sort((a,b) => a-b);
       const maxPerdida = Math.max(...years.map(y => {
         const r = calculateIPCAjusted(neto, y, 2026);
-        return r ? Math.abs(r.perdidaAdquisitivo) : 0;
+        return r ? Math.abs(r.salaryAjustado - neto) : 0;
       }));
 
       let html = '<div class="ipc-timeline-title">Pérdida acumulada desde cada año hasta 2026</div>';
@@ -631,11 +633,12 @@
       for (const year of years) {
         const r = calculateIPCAjusted(neto, year, 2026);
         if (!r) continue;
-        const heightPct = maxPerdida > 0 ? (Math.abs(r.perdidaAdquisitivo) / maxPerdida * 100) : 0;
+        const perdidaNeta = r.salaryAjustado - neto; // positivo = pierdes, negativo = ganas
+        const heightPct = maxPerdida > 0 ? (Math.abs(perdidaNeta) / maxPerdida * 100) : 0;
         const isActive = year === selectedIPCYear;
-        const color = r.perdidaAdquisitivo > 0 ? "#ef4444" : "#10b981";
+        const color = perdidaNeta > 0 ? "#ef4444" : "#10b981";
 
-        html += `<div class="ipc-timeline-bar ${isActive ? 'active' : ''}" data-year="${year}" title="${year}: ${fmt(r.perdidaAdquisitivo)}">`;
+        html += `<div class="ipc-timeline-bar ${isActive ? 'active' : ''}" data-year="${year}" title="${year}: ${fmt(perdidaNeta)}">`;
         html += `<div class="bar-fill" style="height:${Math.max(heightPct, 2)}%;background:${color}"></div>`;
         html += `<div class="bar-year">${year}</div>`;
         html += `</div>`;
