@@ -1,9 +1,93 @@
-// data.js v4 — MEI + Cuota de solidaridad 2025/2026
+// data.js v5 — IPC, Coste Empresa, Radiografía visual
 // Fuente: PDF oficial hacienda.gob.es "Capítulo IV Tributación Autonómica 2026"
 // Cálculo correcto: dos cuotas separadas (estatal + autonómica) sobre la misma base liquidable
-// v4: Añadido MEI (0.15% trabajador 2026) + cuota de solidaridad para bases > máximo
+// v5: Añadido IPC INE base 2021 + cálculo coste empresa + desglose visual
 //     Base máxima SS 2026: 61.214,40€/año
 //     Tipo SS trabajador: 6.35% + 0.15% MEI = 6.50%
+//     Tipo SS empresa (cotización común): 23.60% + 0.50% desempleo = 24.10%
+
+// IPC (Índice de Precios de Consumo) — base 2021, medias anuales INE
+// Fuente: INE tabla 50934, serie base 2021, medias anuales
+// 2026 estimado extrapolado de variación interanual +3.4% (marzo 2026)
+const ipcData = {
+    2012: 92.717,
+    2013: 94.023,
+    2014: 93.881,
+    2015: 93.412,
+    2016: 93.222,
+    2017: 95.046,
+    2018: 96.638,
+    2019: 97.314,
+    2020: 97.000,
+    2021: 100.000,
+    2022: 108.391,
+    2023: 112.219,
+    2024: 115.333,
+    2025: 118.415,
+    2026: 122.440
+};
+
+function getIPC(year) {
+    return ipcData[year] || ipcData[2025];
+}
+
+// Cálcula la comparativa de poder adquisitivo entre dos años
+// Retorna: salario ajustado al año target, pérdida/ganancia real
+function calculateIPCAjusted(salary, yearBase, yearTarget) {
+    const ipcBase = getIPC(yearBase);
+    const ipcTarget = getIPC(yearTarget);
+    if (!ipcBase || !ipcTarget) return null;
+    const salaryAjustado = salary * (ipcTarget / ipcBase);
+    const perdidaAdquisitivo = salary - salaryAjustado;
+    const perdidaPercent = (perdidaAdquisitivo / salary) * 100;
+    return {
+        salaryOriginal: salary,
+        salaryAjustado: salaryAjustado,
+        perdidaAdquisitivo: perdidaAdquisitivo,
+        perdidaPercent: perdidaPercent,
+        ipcBase: ipcBase,
+        ipcTarget: ipcTarget,
+        factor: ipcTarget / ipcBase
+    };
+}
+
+// Cotización seguridad social 2026 — trabajador + empresa
+const SS_CONFIG_2026 = {
+    baseMaxima: 61214.40,
+    tipoTrabajador: 0.0635,  // 6.35% contingencias comunes
+    tipoMEI: 0.0015,         // 0.15% MEI intergeneracional
+    tipoTotalTrabajador: 0.0650,  // 6.35% + 0.15% = 6.50%
+    tipoEmpresaComun: 0.2360,     // 23.60% contingencias comunes empresa
+    tipoEmpresaDesempleo: 0.0050,  // 0.50% desempleo empresa
+    tipoTotalEmpresa: 0.2410,     // 24.10% total empresa
+    minimoContribuyente: 2268     // Mínimo tributable 2026
+};
+
+function calculateCosteEmpresa(bruto) {
+    const cfg = SS_CONFIG_2026;
+    const baseSS = Math.min(bruto, cfg.baseMaxima);
+    
+    // Cotización trabajador
+    const ssTrabajador = baseSS * cfg.tipoTotalTrabajador;
+    
+    // Cotización empresa
+    const ssEmpresa = baseSS * cfg.tipoTotalEmpresa;
+    
+    // Coste total empresa = bruto + SS empresa
+    const costeTotal = bruto + ssEmpresa;
+    
+    return {
+        bruto: bruto,
+        baseSS: baseSS,
+        ssTrabajador: ssTrabajador,
+        ssTrabajadorPercent: (ssTrabajador / bruto) * 100,
+        ssEmpresa: ssEmpresa,
+        ssEmpresaPercent: (ssEmpresa / bruto) * 100,
+        costeTotal: costeTotal,
+        costeTotalPercent: (costeTotal / bruto) * 100,
+        ratioEmpresaTrabajador: ssEmpresa / ssTrabajador
+    };
+}
 
 const CCAA_NAMES = {
   supletorio: "Supletorio (estatal)",

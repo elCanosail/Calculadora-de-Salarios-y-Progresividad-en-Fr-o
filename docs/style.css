@@ -4,11 +4,15 @@
   --muted: #64748b;
   --accent: #0e3a8a;
   --accent-light: #1d4ed8;
+  --primary: #2563eb;
   --border: #e2e8f0;
   --card-bg: #f8fafc;
   --radius: 12px;
   --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+  --success: #10b981;
+  --danger: #ef4444;
+  --text: #0f172a;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -469,4 +473,414 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
 
   /* Audit notice stack */
   .audit-notice { flex-direction: column; gap: 0.25rem; }
+}
+
+/* ============================================
+   RADIOGRAFÍA DEL COSTE (v2)
+   ============================================ */
+
+.radiografia-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .radiografia-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+.donut-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.donut-chart {
+    width: 200px;
+    height: 200px;
+}
+
+.donut-center {
+    fill: var(--bg);
+}
+
+.donut-segment {
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+}
+
+.donut-segment:hover {
+    opacity: 0.85;
+}
+
+.donut-legend {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    justify-content: center;
+    font-size: 0.85rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.coste-desglose {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.coste-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.coste-row:last-child {
+    border-bottom: none;
+}
+
+.total-row {
+    font-weight: 600;
+    border-top: 2px solid var(--primary);
+    margin-top: 0.3rem;
+    padding-top: 0.5rem;
+}
+
+.total-empresa-row {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary);
+    border-top: 2px solid var(--primary);
+    margin-top: 0.3rem;
+    padding-top: 0.5rem;
+}
+
+.coste-value {
+    font-family: monospace;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.coste-value.neto { color: #10b981; }
+.coste-value.irpf { color: #ef4444; }
+.coste-value.ss-trab { color: #f59e0b; }
+.coste-value.bruto { color: #374151; }
+.coste-value.ss-empresa { color: #ec4899; }
+.coste-value.total-empresa { color: var(--primary); font-size: 1.15rem; }
+
+.empresa-row {
+    background: rgba(236, 72, 153, 0.05);
+    padding: 0.35rem 0.5rem;
+    border-radius: 4px;
+    margin: 0.15rem 0;
+}
+
+.coste-mini-info {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.mini-pill {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.separator {
+    border-top: 1px dashed var(--border);
+    margin: 0.5rem 0;
+}
+
+/* ============================================
+   COMPARATIVA IPC (v2)
+   ============================================ */
+
+.ipc-controls {
+    margin-bottom: 1.5rem;
+}
+
+.ipc-controls label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--muted);
+}
+
+.year-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.year-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    color: var(--text);
+}
+
+.year-btn:hover {
+    background: var(--border);
+}
+
+.year-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.year-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.ipc-result {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .ipc-result {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+.ipc-main {
+    text-align: center;
+}
+
+.ipc-big-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--danger);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.ipc-big-number.ganancia {
+    color: var(--success);
+}
+
+.ipc-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.ipc-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.ipc-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.ipc-detail-row.ipc-source {
+    border-bottom: none;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+.ipc-timeline {
+    margin-top: 1.5rem;
+}
+
+.ipc-timeline-title {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.ipc-timeline-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.3rem;
+    height: 120px;
+    padding: 0 0.5rem;
+}
+
+.ipc-timeline-bar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.ipc-timeline-bar .bar-fill {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+    transition: opacity 0.2s ease;
+    min-height: 2px;
+}
+
+.ipc-timeline-bar:hover .bar-fill {
+    opacity: 0.8;
+}
+
+.ipc-timeline-bar .bar-year {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+    white-space: nowrap;
+}
+
+.ipc-timeline-bar.active .bar-fill {
+    border: 2px solid var(--primary);
+}
+
+/* ============================================
+   DESGLOSE POR TRAMOS IRPF (v2)
+   ============================================ */
+
+.tramos-legend {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+.tramo-dot {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.tramo-dot::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.tramo-dot.estatal::before {
+    background: #3b82f6;
+}
+
+.tramo-dot.autonomico::before {
+    background: #8b5cf6;
+}
+
+.tramos-chart {
+    margin-bottom: 1.5rem;
+}
+
+.tramo-bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+}
+
+.tramo-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+}
+
+.tramo-bar-bg {
+    height: 24px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+}
+
+.tramo-bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: white;
+    font-weight: 600;
+    transition: width 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.tramo-bar-fill.estatal {
+    background: #3b82f6;
+}
+
+.tramo-bar-fill.autonomico {
+    background: #8b5cf6;
+}
+
+.tramos-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.tramos-table th,
+.tramos-table td {
+    padding: 0.5rem 0.6rem;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+}
+
+.tramos-table th:first-child,
+.tramos-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+}
+
+.tramos-table th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.tramos-table tr:hover {
+    background: rgba(59, 130, 246, 0.04);
 }

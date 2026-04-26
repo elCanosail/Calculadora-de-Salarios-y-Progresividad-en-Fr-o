@@ -16,7 +16,9 @@
   const pillsDiv = document.getElementById("ccaa-pills");
 
   let currentSalary = 35000;
+  let currentNetoMadrid = null;
   let selectedScales = new Set(["supletorio", "madrid", "cataluna", "comunidad_valenciana"]);
+  let selectedIPCYear = 2019;
 
   // --- Configuración ---
   function getConfig() {
@@ -401,11 +403,15 @@
     const config = getConfig();
     updateConfigSummary(config);
     const results = CCAA_KEYS.map(key => ({ key, res: calcularIRPF(currentSalary, key, config) }));
+    currentNetoMadrid = results.find(r => r.key === "madrid")?.res.neto || null;
     renderBarChart(results);
     renderTable(results);
     renderScaleChart();
     updateMeiNotice();
     renderYearComparison();
+    renderRadiografia();
+    renderIPCComparison();
+    renderTramosDesglose();
   }
 
   function updateMeiNotice() {
@@ -487,10 +493,258 @@
     chart.innerHTML = chartHtml;
   }
 
+  // --- Panel: Radiografía del Coste ---
+  function renderRadiografia() {
+    const bruto = parseFloat(salaryInput.value) || 0;
+    if (bruto <= 0) return;
+
+    const coste = calculateCosteEmpresa(bruto);
+    const neto = currentNetoMadrid || (bruto * 0.75); // fallback
+    const irpf = bruto - neto - coste.ssTrabajador;
+
+    // Donut chart
+    const svg = document.getElementById("coste-donut");
+    if (svg) {
+      const total = coste.costeTotal;
+      const data = [
+        { label: "Neto", value: neto, color: "#10b981", percent: (neto/total)*100 },
+        { label: "IRPF", value: irpf, color: "#ef4444", percent: (irpf/total)*100 },
+        { label: "SS trabajador", value: coste.ssTrabajador, color: "#f59e0b", percent: (coste.ssTrabajador/total)*100 },
+        { label: "SS empresa", value: coste.ssEmpresa, color: "#ec4899", percent: (coste.ssEmpresa/total)*100 }
+      ];
+
+      let svgHtml = '';
+      let cumulativePercent = 0;
+      const cx = 100, cy = 100, r = 80, innerR = 55;
+
+      for (const d of data) {
+        if (d.percent < 1) continue;
+        const startAngle = (cumulativePercent / 100) * Math.PI * 2 - Math.PI / 2;
+        cumulativePercent += d.percent;
+        const endAngle = (cumulativePercent / 100) * Math.PI * 2 - Math.PI / 2;
+
+        const x1 = cx + r * Math.cos(startAngle);
+        const y1 = cy + r * Math.sin(startAngle);
+        const x2 = cx + r * Math.cos(endAngle);
+        const y2 = cy + r * Math.sin(endAngle);
+        const x3 = cx + innerR * Math.cos(endAngle);
+        const y3 = cy + innerR * Math.sin(endAngle);
+        const x4 = cx + innerR * Math.cos(startAngle);
+        const y4 = cy + innerR * Math.sin(startAngle);
+
+        const largeArc = d.percent > 50 ? 1 : 0;
+
+        svgHtml += `<path d="M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 ${largeArc} 0 ${x4} ${y4} Z" fill="${d.color}" class="donut-segment" data-label="${d.label}: ${fmt(d.value)} (${d.percent.toFixed(1)}%)"/>`;
+      }
+
+      // Center circle
+      svgHtml += `<circle cx="${cx}" cy="${cy}" r="${innerR}" fill="var(--bg)" class="donut-center"/>`;
+      svgHtml += `<text x="${cx}" y="${cy - 5}" text-anchor="middle" font-size="10" fill="var(--muted)">Coste</text>`;
+      svgHtml += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--fg)">${fmt(coste.costeTotal)}</text>`;
+
+      svg.innerHTML = svgHtml;
+
+      // Legend
+      const legend = document.getElementById("donut-legend");
+      if (legend) {
+        legend.innerHTML = data.map(d =>
+          `<span class="legend-item"><span class="legend-dot" style="background:${d.color}"></span>${d.label} ${d.percent.toFixed(1)}%</span>`
+        ).join('');
+      }
+    }
+
+    // Desglose texto
+    const desglose = document.getElementById("coste-desglose");
+    if (desglose) {
+      desglose.innerHTML = `
+        <div class="coste-row"><span class="coste-label">💰 Tu neto anual</span><span class="coste-value neto">${fmt(neto)}</span></div>
+        <div class="coste-row"><span class="coste-label">🏛️ IRPF retenido</span><span class="coste-value irpf">${fmt(irpf)}</span></div>
+        <div class="coste-row"><span class="coste-label">🛡️ SS trabajador (${coste.ssTrabajadorPercent.toFixed(2)}%)</span><span class="coste-value ss-trab">${fmt(coste.ssTrabajador)}</span></div>
+        <div class="coste-row total-row"><span class="coste-label">📄 Bruto (coste para ti)</span><span class="coste-value bruto">${fmt(bruto)}</span></div>
+        <div class="separator"></div>
+        <div class="coste-row empresa-row"><span class="coste-label">🏢 SS empresa (+${coste.ssEmpresaPercent.toFixed(1)}%)</span><span class="coste-value ss-empresa">${fmt(coste.ssEmpresa)}</span></div>
+        <div class="coste-row total-empresa-row"><span class="coste-label">💸 Coste TOTAL empresa</span><span class="coste-value total-empresa">${fmt(coste.costeTotal)}</span></div>
+        <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--muted);text-align:center">Ratio empresa/trabajador: ${coste.ratioEmpresaTrabajador.toFixed(2)}×</div>
+      `;
+    }
+  }
+
+  // --- Panel: Comparativa IPC ---
+  function renderIPCSelector() {
+    const container = document.getElementById("ipc-year-selector");
+    if (!container) return;
+
+    const years = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
+    container.innerHTML = years.map(y =>
+      `<button class="year-btn ${y === selectedIPCYear ? 'active' : ''}" data-year="${y}">${y}</button>`
+    ).join('');
+
+    container.querySelectorAll('.year-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedIPCYear = parseInt(btn.dataset.year);
+        renderIPCSelector();
+        renderIPCComparison();
+      });
+    });
+  }
+
+  function renderIPCComparison() {
+    const bruto = parseFloat(salaryInput.value) || 0;
+    if (bruto <= 0) return;
+
+    // Use Madrid neto as reference
+    const neto = currentNetoMadrid || bruto * 0.75;
+    const result = calculateIPCAjusted(neto, selectedIPCYear, 2026);
+    if (!result) return;
+
+    const perdida = result.perdidaAdquisitivo;
+    const isGanancia = perdida < 0;
+
+    // Main display
+    const perdidaEl = document.getElementById("ipc-perdida");
+    if (perdidaEl) {
+      perdidaEl.textContent = (isGanancia ? "+" : "−") + fmt(Math.abs(perdida)) + "/año";
+      perdidaEl.className = "ipc-big-number " + (isGanancia ? "ganancia" : "");
+    }
+
+    const salarioActual = document.getElementById("ipc-salario-actual");
+    if (salarioActual) salarioActual.textContent = fmt(neto);
+
+    const salarioAjustado = document.getElementById("ipc-salario-ajustado");
+    if (salarioAjustado) salarioAjustado.textContent = fmt(result.salaryAjustado);
+
+    const anoBase = document.getElementById("ipc-ano-base");
+    if (anoBase) anoBase.textContent = selectedIPCYear;
+
+    // Timeline
+    const timeline = document.getElementById("ipc-timeline");
+    if (timeline) {
+      const years = Object.keys(ipcData).map(Number).filter(y => y >= 2019 && y <= 2026).sort((a,b) => a-b);
+      const maxPerdida = Math.max(...years.map(y => {
+        const r = calculateIPCAjusted(neto, y, 2026);
+        return r ? Math.abs(r.perdidaAdquisitivo) : 0;
+      }));
+
+      let html = '<div class="ipc-timeline-title">Pérdida acumulada por año de referencia</div>';
+      html += '<div class="ipc-timeline-bars">';
+
+      for (const year of years) {
+        const r = calculateIPCAjusted(neto, year, 2026);
+        if (!r) continue;
+        const heightPct = maxPerdida > 0 ? (Math.abs(r.perdidaAdquisitivo) / maxPerdida * 100) : 0;
+        const isActive = year === selectedIPCYear;
+        const color = r.perdidaAdquisitivo > 0 ? "#ef4444" : "#10b981";
+
+        html += `<div class="ipc-timeline-bar ${isActive ? 'active' : ''}" data-year="${year}" title="${year}: ${fmt(r.perdidaAdquisitivo)}/año">`;
+        html += `<div class="bar-fill" style="height:${Math.max(heightPct, 2)}%;background:${color}"></div>`;
+        html += `<div class="bar-year">${year}</div>`;
+        html += `</div>`;
+      }
+
+      html += '</div>';
+      timeline.innerHTML = html;
+
+      timeline.querySelectorAll('.ipc-timeline-bar').forEach(bar => {
+        bar.addEventListener('click', () => {
+          selectedIPCYear = parseInt(bar.dataset.year);
+          renderIPCSelector();
+          renderIPCComparison();
+        });
+      });
+    }
+  }
+
+  // --- Panel: Desglose por Tramos IRPF ---
+  function renderTramosDesglose() {
+    const bruto = parseFloat(salaryInput.value) || 0;
+    if (bruto <= 0) return;
+
+    // Get Madrid scales for display
+    const scales = taxData.madrid || taxData.supletorio;
+    if (!scales) return;
+
+    // Calculate which tramos apply
+    const ssTrab = Math.min(bruto, SS_CONFIG_2026.baseMaxima) * SS_CONFIG_2026.tipoTotalTrabajador;
+    const baseLiquidable = Math.max(0, bruto - ssTrab - SS_CONFIG_2026.minimoContribuyente);
+
+    const tramos = [];
+    let remaining = baseLiquidable;
+    let totalIrpf = 0;
+
+    for (let i = 0; i < scales.length && remaining > 0; i++) {
+      const t = scales[i];
+      const tramoBase = Math.min(remaining, t.to - t.from);
+      const estatal = tramoBase * t.rate;
+      const autonomico = tramoBase * t.regionalRate;
+      const total = estatal + autonomico;
+
+      tramos.push({
+        num: i + 1,
+        from: t.from,
+        to: t.to,
+        estatalRate: t.rate,
+        autonomicoRate: t.regionalRate,
+        totalRate: t.rate + t.regionalRate,
+        base: tramoBase,
+        estatal: estatal,
+        autonomico: autonomico,
+        total: total
+      });
+
+      totalIrpf += total;
+      remaining -= tramoBase;
+    }
+
+    // Render stacked bars
+    const chart = document.getElementById("tramos-chart");
+    if (chart) {
+      const maxTotal = Math.max(...tramos.map(t => t.total), 1);
+
+      let html = '';
+      for (const t of tramos) {
+        const estatalPct = (t.estatal / maxTotal) * 100;
+        const autonomicoPct = (t.autonomico / maxTotal) * 100;
+        const labelFrom = t.from >= 1000000 ? "∞" : fmt(t.from);
+        const labelTo = t.to >= 1000000 ? "∞" : fmt(t.to);
+
+        html += `<div class="tramo-bar-container">`;
+        html += `<div class="tramo-label"><span>Tramo ${t.num}: ${labelFrom} — ${labelTo}</span><span>${(t.totalRate * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="tramo-bar-bg">`;
+        if (t.estatal > 0) {
+          html += `<div class="tramo-bar-fill estatal" style="width:${estatalPct}%">${estatalPct > 15 ? fmt(t.estatal) : ''}</div>`;
+        }
+        if (t.autonomico > 0) {
+          html += `<div class="tramo-bar-fill autonomico" style="width:${autonomicoPct}%">${autonomicoPct > 15 ? fmt(t.autonomico) : ''}</div>`;
+        }
+        html += `</div></div>`;
+      }
+
+      chart.innerHTML = html;
+    }
+
+    // Render table
+    const tbody = document.getElementById("tramos-tbody");
+    if (tbody) {
+      tbody.innerHTML = tramos.map(t => {
+        const labelFrom = t.from >= 1000000 ? "∞" : fmt(t.from);
+        const labelTo = t.to >= 1000000 ? "∞" : fmt(t.to);
+        return `<tr>
+          <td>Tramo ${t.num}</td>
+          <td>${labelFrom} — ${labelTo}</td>
+          <td>${(t.estatalRate * 100).toFixed(1)}%</td>
+          <td>${(t.autonomicoRate * 100).toFixed(1)}%</td>
+          <td><strong>${(t.totalRate * 100).toFixed(1)}%</strong></td>
+          <td>${fmt(t.total)}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
   // --- Init ---
   renderPills();
   renderVerify();
   renderYearComparison();
+  renderIPCSelector();
   setSalary(35000);
 
   // Formulas & Fuentes links now navigate directly to their pages (no modal)
