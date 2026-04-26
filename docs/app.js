@@ -285,7 +285,7 @@
       { key: "extremadura", bruto: 35000, expected: { neto: 25841, irpf: 6891 } },
     ];
 
-    let html = '<table><thead><tr><th>Caso</th><th>Neto (nuestro)</th><th>Neto (AEAT)</th><th>Δ</th><th>IRPF (nuestro)</th><th>IRPF (AEAT)</th><th>Δ</th><th>OK</th></tr></thead><tbody>';
+    let html = '<div class="table-wrap"><table><thead><tr><th>Caso</th><th>Neto (nuestro)</th><th>Neto (AEAT)</th><th>Δ</th><th>IRPF (nuestro)</th><th>IRPF (AEAT)</th><th>Δ</th><th>OK</th></tr></thead><tbody>';
 
     let allOk = true;
     for (const ref of refs) {
@@ -296,7 +296,7 @@
       if (!ok) allOk = false;
       html += '<tr><td>' + CCAA_NAMES[ref.key] + ' ' + fmt(ref.bruto) + '</td><td class="money">' + fmt(res.neto) + '</td><td class="money">' + fmt(ref.expected.neto) + '</td><td class="money' + (Math.abs(dn) <= 5 ? '' : ' negative') + '">' + (dn >= 0 ? '+' : '') + dn.toLocaleString("es-ES") + '€</td><td class="money">' + fmt(res.irpfFinal) + '</td><td class="money">' + fmt(ref.expected.irpf) + '</td><td class="money' + (Math.abs(di) <= 5 ? '' : ' negative') + '">' + (di >= 0 ? '+' : '') + di.toLocaleString("es-ES") + '€</td><td>' + (ok ? '✅' : '⚠️') + '</td></tr>';
     }
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     html += '<p style="margin-top:0.75rem;font-size:0.8rem;color:var(--muted)">Autocomprobación interna (nuestro cálculo vs nuestro cálculo). Si sale ✅ el motor funciona. Para contrastar con AEAT, usa el <a href="https://www.agenciatributaria.gob.es/AEAT.internet/Inicio/Ayuda/_comp_Consultas_y_Simuladores/_Simuladores/Simulador_IRPF_2025/Simulador_IRPF_2025.shtml" target="_blank" rel="noopener">simulador oficial</a>.</p>';
     card.innerHTML = html;
   }
@@ -311,13 +311,13 @@
     const years = [2024, 2025, 2026];
     const ccaa = "madrid";
 
-    let html = '<table><thead><tr><th>Año</th><th>Bruto</th><th>SS trab.</th><th>IRPF</th><th>Neto</th><th>Coste laboral</th><th>Tipo ef.</th></tr></thead><tbody>';
+    let html = '<div class="table-wrap"><table><thead><tr><th>Año</th><th>Bruto</th><th>SS trab.</th><th>IRPF</th><th>Neto</th><th>Coste laboral</th><th>Tipo ef.</th></tr></thead><tbody>';
 
     for (const year of years) {
       const res = calcularIRPFYear(currentSalary, ccaa, year, config);
       html += '<tr><td><strong>' + year + '</strong></td><td>' + fmt(res.bruto) + '</td><td>' + fmt(res.cotTra) + '</td><td>' + fmt(res.irpfFinal) + '</td><td class="money">' + fmt(res.neto) + '</td><td>' + fmt(res.costeLaboral) + '</td><td>' + fmtPct(res.tipoEfectivo) + '</td></tr>';
     }
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     html += '<p style="margin-top:0.75rem;font-size:0.8rem;color:var(--muted)">Valores para ' + CCAA_NAMES[ccaa] + ' a ' + fmt(currentSalary) + ' bruto.</p>';
     table.innerHTML = html;
 

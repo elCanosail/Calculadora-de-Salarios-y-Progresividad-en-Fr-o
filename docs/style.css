@@ -402,4 +402,23 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
   #bar-chart, #scale-chart { height: auto; }
   .bar-label { width: 90px; font-size: 0.65rem; }
   .bar-val { width: 65px; font-size: 0.7rem; }
+
+  /* Tables: scroll + compact */
+  .table-wrap { margin: 0 -0.5rem; padding: 0 0.5rem; }
+  table { font-size: 0.78rem; min-width: 600px; }
+  thead th { padding: 0.5rem 0.35rem; font-size: 0.65rem; }
+  tbody td { padding: 0.4rem 0.35rem; }
+
+  /* Year compare + verify tables */
+  .card table { min-width: 500px; }
+
+  /* SVG chart scales properly */
+  .scale-svg { min-width: 600px; }
+
+  /* Pills scroll */
+  .ccaa-pills { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; }
+  .pill { flex-shrink: 0; }
+
+  /* Audit notice stack */
+  .audit-notice { flex-direction: column; gap: 0.25rem; }
 }
