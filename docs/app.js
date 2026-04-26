@@ -604,8 +604,12 @@
     // Main display
     const perdidaEl = document.getElementById("ipc-perdida");
     if (perdidaEl) {
-      perdidaEl.textContent = (isGanancia ? "+" : "−") + fmt(Math.abs(perdida));
+      perdidaEl.textContent = (isGanancia ? "+" : "") + fmt(Math.abs(perdida));
       perdidaEl.className = "ipc-big-number " + (isGanancia ? "ganancia" : "");
+    }
+    const ipcLabelEl = document.querySelector(".ipc-label");
+    if (ipcLabelEl) {
+      ipcLabelEl.textContent = isGanancia ? "ganancia de poder adquisitivo" : "pérdida acumulada por inflación";
     }
 
     const salarioActual = document.getElementById("ipc-salario-actual");
