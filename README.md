@@ -1,7 +1,7 @@
 # 💶 IRPF por Comunidad Autónoma — Calculadora Interactiva
 
 ![Web](https://img.shields.io/badge/web-live-success.svg)
-![Version](https://img.shields.io/badge/version-v4-blue.svg)
+![Version](https://img.shields.io/badge/version-v5-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 Calculadora web que compara el salario neto en las **19 comunidades autónomas** españolas, con escalas IRPF 2026 separadas (estatal + autonómica), MEI, cuota de solidaridad y cálculo exacto según la LIRPF.
@@ -10,7 +10,7 @@ Basada en el trabajo de [Jon González](https://github.com/jongonzlz/Calculadora
 
 ## 🌐 Demo
 
-**[elcanosail.github.io/Calculadora-de-Salarios-y-Progresividad-en-Fr-o](https://elcanosail.github.io/Calculadora-de-Salarios-y-Progresividad-en-Fr-o/)**
+**[calculadorairpf.vercel.app](https://calculadorairpf.vercel.app/)**
 
 ## ✨ Funcionalidades
 
@@ -27,6 +27,12 @@ Basada en el trabajo de [Jon González](https://github.com/jongonzlz/Calculadora
 - **Gráfico de escalas** interactivo (SVG): selecciona CCAA y compara tramos marginales estatal/autonómico/combinado
 - **Comparativa anual** 2024 / 2025 / 2026 — evolución del neto con cambios legislativos
 - **Tabla de verificación AEAT** — 5 casos de referencia con contraste automático
+
+### Nuevas funcionalidades (v5)
+- **Radiografía del coste** — Donut chart SVG que desglosa neto / IRPF / SS trabajador / SS empresa
+- **Comparativa IPC** — Datos INE (2012–2026), selector de año base, salario equivalente ajustado por inflación, pérdida de poder adquisitivo
+- **Desglose por tramos IRPF** — Tabla T1–T6 con lo que pagas en cada tramo marginal, selector de CCAA, gráfico de barras apiladas
+- **Tooltips interactivos** — Click en barra/fila del gráfico → tooltip con desglose completo + resaltado bidireccional
 
 ### Datos y cálculo
 - **Escalas IRPF 2026 separadas**: cuota íntegra estatal + cuota íntegra autonómica (régimen común) o escala foral única (Navarra, País Vasco)
@@ -62,6 +68,10 @@ Este fork parte del excelente trabajo de Jon González (auditoría Python → Ex
 | **Comparativa anual** | v4 | 2024 → 2025 → 2026 con desglose de cambios |
 | **Verificación AEAT** | v4 | 5 casos de referencia con contraste inline |
 | **Responsive móvil** | v1 | Tablas con scroll, pills scrollables, layout adaptativo |
+| **Radiografía del coste** | v5 | Donut chart SVG: neto / IRPF / SS trabajador / SS empresa |
+| **Comparativa IPC** | v5 | Datos INE 2012–2026, pérdida de poder adquisitivo |
+| **Desglose por tramos** | v5 | Tabla T1–T6 + gráfico apilado por CCAA |
+| **Tooltips interactivos** | v5 | Click en barra/fila → tooltip + resaltado bidireccional |
 
 ## 🏗️ Estructura del proyecto
 
@@ -121,6 +131,7 @@ npx serve docs
 | v3.0 | 2026-04-24 | Escalas corregidas: La Rioja propia, tipos máx corregidos |
 | v3.1 | 2026-04-25 | Fix: Aragón/Baleares/Canarias tipo máx 0.255 |
 | **v4** | **2026-04-26** | **MEI + cuota solidaridad + base máx SS 61.214€ + coste laboral + comparativa anual + verificación AEAT** |
+| **v5** | **2026-04-26** | **Radiografía del coste (donut SVG) + Comparativa IPC (INE 2012–2026) + Desglose tramos IRPF + Tooltips interactivos** |
 
 ## ⚖️ Aviso legal
 
