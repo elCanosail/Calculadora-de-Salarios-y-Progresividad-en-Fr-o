@@ -349,54 +349,7 @@
   renderYearComparison();
   setSalary(35000);
 
-  // --- Modal FORMULAS.md (v2) ---
-  const modal = document.getElementById("formulas-modal");
-  const modalBody = document.getElementById("formulas-body");
-  const modalClose = document.getElementById("modal-close");
-  const formulasLink = document.getElementById("formulas-link");
-
-  async function loadFormulas() {
-    if (modalBody.dataset.loaded) return;
-    try {
-      const res = await fetch("FORMULAS.md");
-      const text = await res.text();
-      if (typeof marked !== "undefined") {
-        modalBody.innerHTML = marked.parse(text);
-      } else {
-        modalBody.innerHTML = `<pre style="white-space:pre-wrap;font-family:monospace;font-size:0.85rem;line-height:1.6">${text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>`;
-      }
-      if (typeof hljs !== "undefined") {
-        modalBody.querySelectorAll("pre code").forEach(block => hljs.highlightElement(block));
-      }
-      modalBody.dataset.loaded = "true";
-    } catch (e) {
-      modalBody.innerHTML = `<p class="error">Error cargando FORMULAS.md. <a href="FORMULAS.md" target="_blank">Abrir directamente</a>.</p>`;
-    }
-  }
-
-  function openModal() {
-    modal.classList.add("open");
-    document.body.style.overflow = "hidden";
-    loadFormulas();
-  }
-
-  function closeModal() {
-    modal.classList.remove("open");
-    document.body.style.overflow = "";
-  }
-
-  // Expose globally for inline onclick
-  window.__openFormulasModal = openModal;
-  window.__closeFormulasModal = closeModal;
-
-  // Expose globally for inline onclick
-  window.__openFormulasModal = openModal;
-  window.__closeFormulasModal = closeModal;
-
-  // Use both addEventListener and onclick for maximum browser compatibility
-  if (formulasLink) {
-    formulasLink.addEventListener("click", (e) => { e.preventDefault(); openModal(); });
-  }
+  // Formulas & Fuentes links now navigate directly to their pages (no modal)
   if (modalClose) modalClose.addEventListener("click", closeModal);
   if (modal) modal.addEventListener("click", (e) => { if (e.target === modal || e.target.classList.contains("modal-backdrop")) closeModal(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
