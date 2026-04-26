@@ -90,13 +90,30 @@ docs/
 
 ```bash
 git clone https://github.com/elCanosail/Calculadora-de-Salarios-y-Progresividad-en-Fr-o.git
-cd Calculadora-de-Salarios-y-Progresividad-en-Fr-o/docs
+cd Calculadora-de-Salarios-y-Progresividad-en-Fr-o
+# Activar hooks (pre-commit + post-push)
+git config core.hooksPath .githooks
+cd docs
 # Abrir docs/index.html en el navegador (no necesita servidor)
 ```
 
 Para desarrollo con live reload:
 ```bash
 npx serve docs
+```
+
+## 🛡️ CI/Verificación
+
+- **`scripts/verify-deploy.sh`** — Smoke test con 15 checks (HTTP, JS, DOM, cache busters, sintaxis)
+- **`.githooks/pre-commit`** — Bloquea `const`/`let` globales en JS (bug de visibilidad cross-script)
+- **`.githooks/post-push`** — Ejecuta `verify-deploy.sh` automáticamente tras cada push
+
+```bash
+# Tras git clone, activar los hooks:
+git config core.hooksPath .githooks
+
+# Verificar deploy manualmente:
+./scripts/verify-deploy.sh
 ```
 
 ## 📐 Cálculo (régimen común, v4)
