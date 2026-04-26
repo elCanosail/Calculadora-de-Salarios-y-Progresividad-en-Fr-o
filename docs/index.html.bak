@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IRPF por CCAA — Comparativa de salario neto en las 19 comunidades (MEI + solidaridad)</title>
-  <meta name="description" content="Compara tu salario neto en las 19 comunidades autónomas de España. Escalas IRPF 2025-2026, MEI, cuota de solidaridad, tipos marginales, calculadora interactiva.">
+  <title>IRPF por CCAA — Comparativa de salario neto en las 19 comunidades</title>
+  <meta name="description" content="Compara tu salario neto en las 19 comunidades autónomas de España. Escalas IRPF 2025-2026, tipos marginales, calculadora interactiva con deducciones.">
   <meta property="og:title" content="IRPF por Comunidad Autónoma">
   <meta property="og:description" content="Compara tu salario neto en las 19 CCAA españolas. Escalas IRPF 2025-2026, tipos marginales, calculadora interactiva.">
   <meta property="og:type" content="website">
@@ -12,7 +12,7 @@
   <meta name="twitter:card" content="summary">
   <link rel="canonical" href="https://elcanosail.github.io/Calculadora-de-Salarios-y-Progresividad-en-Fr-o/">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=13">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self'; connect-src 'self'; font-src 'self';">
 
 </head>
@@ -77,7 +77,6 @@
       </div>
 
       <div class="config-summary" id="config-summary"></div>
-      <div class="mei-notice" id="mei-notice" style="margin-top:0.5rem;font-size:0.82rem;color:var(--muted);line-height:1.5;"></div>
       <div class="audit-notice">
         <span class="audit-icon">📋</span>
         <a href="formulas.html" target="_blank" id="formulas-link" class="link-button">Fórmulas del cálculo</a> con referencias al BOE · <a href="fuentes.html" target="_blank" class="link-button">Fuentes y verificación</a> · <a href="escalas.csv" download class="link-button">📊 Descargar escalas (CSV)</a>
@@ -140,7 +139,7 @@
     </div>
   </footer>
 
-  <script src="data.js?v=14"></script>
-  <script src="app.js?v=14"></script>
+  <script src="data.js?v=13"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>

@@ -253,20 +253,6 @@
     renderBarChart(results);
     renderTable(results);
     renderScaleChart();
-    updateMeiNotice();
-  }
-
-  function updateMeiNotice() {
-    const notice = document.getElementById("mei-notice");
-    if (!notice) return;
-    const res = calcularIRPF(currentSalary, "madrid");
-    const parts = [];
-    parts.push("SS: " + fmt(res.cotSS) + " (6.35% comunes) + MEI: " + fmt(Math.round(res.baseSS * 0.0015)) + " (0.15%)");
-    if (res.cotSolidaridad > 0) {
-      parts.push("Solidaridad: " + fmt(res.cotSolidaridad) + " (1/6 trabajador)");
-    }
-    parts.push("Base max. SS: " + fmt(Math.round(BASE_MAX_SS)) + " EUR/anio");
-    notice.innerHTML = parts.join(" · ");
   }
 
   // --- Init ---

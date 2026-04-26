@@ -105,19 +105,44 @@
     <a href="index.html" class="back-link">← Volver a la calculadora</a>
 
     <h1>Fórmulas del cálculo</h1>
-    <p class="subtitle">Especificación de referencia para auditoría por expertos fiscales · v3.1 · 2026-04-25 · Escalas: PDF Hacienda 2026</p>
+    <p class="subtitle">Especificación de referencia para auditoría por expertos fiscales · v4 · 2026-04-26 · Escalas: PDF Hacienda 2026 · MEI + Solidaridad</p>
 
     <!-- 1 -->
     <h2>1. Parámetros legales (2025/2026)</h2>
 
-    <h3>1.1 Cotización a la Seguridad Social</h3>
+    <h3>1.1 Cotización a la Seguridad Social + MEI</h3>
     <table>
       <tr><th>Concepto</th><th>Valor</th><th>Fuente</th></tr>
-      <tr><td>Base máxima de cotización</td><td>58.914 €/año</td><td>Real Decreto-ley 8/2025</td></tr>
+      <tr><td>Base máxima de cotización (2026)</td><td>61.214,40 €/año</td><td>RDL 8/2025 (proyección 2026)</td></tr>
       <tr><td>Tipo trabajador (comunes + desempleo + FP)</td><td>6,35%</td><td>Art. 311 TRLGSS</td></tr>
+      <tr><td>MEI trabajador</td><td>0,15%</td><td>RDL 2/2023 (MEI 2026)</td></tr>
+      <tr><td>MEI empresarial</td><td>0,75%</td><td>RDL 2/2023 (MEI 2026)</td></tr>
+      <tr><td>Tipo total trabajador (SS + MEI)</td><td>6,50%</td><td></td></tr>
     </table>
-    <div class="formula-box">baseSS = min(bruto_anual, 58.914)
-cotizaciónSS = baseSS × 0,0635</div>
+    <div class="formula-box">baseSS = min(bruto_anual, 61.214,40)
+cotizacionSS = baseSS × 0,0635
+mei = baseSS × 0,0015
+cotizacion_total_tra = cotizacionSS + mei
+// = baseSS × 0,065</div>
+
+    <h3>1.1b Cuota de solidaridad (bases > base máxima)</h3>
+    <div class="callout"><strong>⚠ Nueva 2025/2026:</strong> Desde 2025, existe una cuota de solidaridad sobre la parte del salario que supera la base máxima de cotización. Se reparte 5/6 empresarial y 1/6 trabajador.</div>
+    <table>
+      <tr><th>Tramo de exceso</th><th>Tipo solidaridad 2026</th></tr>
+      <tr><td>Hasta 10% de la base máxima</td><td>1,15%</td></tr>
+      <tr><td>Entre 10% y 50% de la base máxima</td><td>1,25%</td></tr>
+      <tr><td>Más del 50% de la base máxima</td><td>1,46%</td></tr>
+    </table>
+    <div class="formula-box">Si bruto <= baseMaxSS: solidaridad = 0
+Si bruto > baseMaxSS:
+  exceso = bruto - baseMaxSS
+  tramo1 = min(exceso, 0.10 × baseMaxSS) × 0.0115
+  tramo2 = min(exceso - 0.10×baseMaxSS, 0.40×baseMaxSS) × 0.0125
+  tramo3 = max(0, exceso - 0.50×baseMaxSS) × 0.0146
+  solidaridad_total = tramo1 + tramo2 + tramo3
+  cuota_trabajador = solidaridad_total / 6
+  cuota_empresarial = solidaridad_total × 5/6</div>
+    <p><span class="ref">RDL 8/2025</span> — Cuota de solidaridad sobre bases superiores a la base máxima de cotización.</p>
 
     <h3>1.2 Reducción por obtención de rentas del trabajo (Art. 20 LIRPF)</h3>
     <table>
@@ -384,7 +409,8 @@ tipoEfectivo = 5.461 / 35.000 = 15,6%</div>
       <tr><td>v1.1</td><td>Reducción fija estatal</td><td>Combinadas incorrectas</td><td>~500 € menor</td></tr>
       <tr><td>v2.0</td><td>Reducción según Art. 63</td><td>Combinadas incorrectas</td><td>Ranking invertido a 120k</td></tr>
       <tr><td>v3.0</td><td>Escalas separadas (PDF Hacienda)</td><td>La Rioja supletoria, tipos máx 0.275 en 3 CCAA</td><td>±2 € vs AEAT</td></tr>
-      <tr><td><strong>v3.1 (actual)</td><td>Escaladas corregidas</td><td><strong>La Rioja escala propia, tipos máx 0.255</strong></td><td><strong>±2 € vs AEAT</strong></td></tr>
+      <tr><td>v3.1</td><td>Escaladas corregidas</td><td>La Rioja escala propia, tipos máx 0.255</td><td>±2 € vs AEAT</td></tr>
+      <tr><td><strong>v4 (actual)</strong></td><td><strong>MEI + Cuota de solidaridad</strong></td><td><strong>Base máx. SS 61.214,40€, MEI 0.15%/0.75%, solidaridad tramos progresivos</strong></td><td><strong>Coste laboral completo incluido</strong></td></tr>
     </table>
 
     <div class="callout">

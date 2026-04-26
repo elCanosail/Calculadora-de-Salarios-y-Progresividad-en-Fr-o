@@ -1,9 +1,7 @@
-// data.js v4 — MEI + Cuota de solidaridad 2025/2026
+// data.js v3.1 — Escalas IRPF 2026 separadas (estatal + autonómica)
 // Fuente: PDF oficial hacienda.gob.es "Capítulo IV Tributación Autonómica 2026"
 // Cálculo correcto: dos cuotas separadas (estatal + autonómica) sobre la misma base liquidable
-// v4: Añadido MEI (0.15% trabajador 2026) + cuota de solidaridad para bases > máximo
-//     Base máxima SS 2026: 61.214,40€/año
-//     Tipo SS trabajador: 6.35% + 0.15% MEI = 6.50%
+// v3.1: Fix La Rioja (escala propia), Aragón/Baleares/Canarias (tipo máx 0.255)
 
 const CCAA_NAMES = {
   supletorio: "Supletorio (estatal)",
@@ -161,27 +159,9 @@ const ESCALAS = {};
   }
 })();
 
-// ─── Parámetros SS 2026 ───
-// Base máxima: Real Decreto-ley 8/2025 (actualizado 2026: 61.214,40 €/año)
-// MEI: Real Decreto-ley 2/2023 (0.15% trabajador, 0.75% empresarial en 2026)
-// Cuota de solidaridad: RDL 8/2025 (tramos progresivos sobre exceso de base)
-const BASE_MAX_SS = 61214.40;
-const TIPO_SS_COMUNES_TRA = 0.047;
-const TIPO_SS_DESEMPLEO_TRA = 0.0155;
-const TIPO_SS_FP_TRA = 0.001;
-const TIPO_MEI_TRA = 0.0015;
-const TIPO_SS_TRA = TIPO_SS_COMUNES_TRA + TIPO_SS_DESEMPLEO_TRA + TIPO_SS_FP_TRA + TIPO_MEI_TRA; // 0.065
-const TIPO_SS_EMPRESARIAL = 0.236 + 0.058 + 0.0006 + 0.0075; // comunes + desempleo + FP + MEI
-
-// Cuota de solidaridad 2026 (solo para bases > BASE_MAX_SS)
-const SOLIDARIDAD_TRAMOS = [
-  { hasta: BASE_MAX_SS * 0.10, tipo: 0.0115 },  // 0-10% exceso
-  { hasta: BASE_MAX_SS * 0.50, tipo: 0.0125 },  // 10%-50% exceso
-  { hasta: Infinity, tipo: 0.0146 }               // >50% exceso
-];
-const SOLIDARIDAD_RATIO_EMPRESARIAL = 5 / 6;
-const SOLIDARIDAD_RATIO_TRABAJADOR = 1 / 6;
-
+// Parámetros SS 2025/2026
+const BASE_MAX_SS = 58914;
+const TIPO_SS_TRA = 0.0635;
 const GASTOS_FIJOS = 2000;
 const MINIMO_EXENTO = 15876;
 const TOPE_RETENCION = 0.43;
@@ -201,23 +181,6 @@ const DEFAULT_CONFIG = {
   discapacidad: 0,
   tributacion: "individual"
 };
-
-// ─── Cálculo de cuota de solidaridad (solo bases > BASE_MAX_SS) ───
-function cuotaSolidaridad(bruto) {
-  if (bruto <= BASE_MAX_SS) return { total: 0, empresarial: 0, trabajador: 0 };
-  const exceso = bruto - BASE_MAX_SS;
-  const limite1 = BASE_MAX_SS * 0.10;
-  const limite2 = BASE_MAX_SS * 0.50;
-  const tramo1 = Math.min(exceso, limite1) * 0.0115;
-  const tramo2 = Math.min(Math.max(0, exceso - limite1), limite2 - limite1) * 0.0125;
-  const tramo3 = Math.max(0, exceso - limite2) * 0.0146;
-  const total = tramo1 + tramo2 + tramo3;
-  return {
-    total,
-    empresarial: total * SOLIDARIDAD_RATIO_EMPRESARIAL,
-    trabajador: total * SOLIDARIDAD_RATIO_TRABAJADOR
-  };
-}
 
 // ─── Helper: calcular cuota íntegra sobre baseLiq con una escala ───
 function cuotaIntegra(baseLiq, escala) {
@@ -261,17 +224,9 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
 
   const brutoPos = Math.max(0, bruto);
 
-  // 1. Base cotización SS (topada) + MEI
+  // 1. Base cotización SS
   const baseSS = Math.min(brutoPos, BASE_MAX_SS);
-  const cotSSComun = Math.round(baseSS * TIPO_SS_TRA * 100) / 100;
-  
-  // 2. Cuota de solidaridad (solo si bruto > BASE_MAX_SS)
-  const solidaridad = cuotaSolidaridad(brutoPos);
-  const cotTra = Math.round((cotSSComun + solidaridad.trabajador) * 100) / 100;
-  
-  // Coste empresarial (informativo, no resta del neto)
-  const cotEmpresarial = Math.round((baseSS * TIPO_SS_EMPRESARIAL + solidaridad.empresarial) * 100) / 100;
-  const costeLaboral = Math.round((brutoPos + cotEmpresarial) * 100) / 100;
+  const cotTra = Math.round(baseSS * TIPO_SS_TRA * 100) / 100;
 
   // 2. Rendimiento neto previo
   const rn = Math.max(0, brutoPos - cotTra);
@@ -371,18 +326,13 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
 
   return {
     bruto: brutoPos,
-    baseSS: Math.round(baseSS),
-    cotSS: Math.round(cotSSComun),
-    cotSolidaridad: +solidaridad.trabajador.toFixed(2),
     cotTra: Math.round(cotTra),
-    cotEmpresarial: Math.round(cotEmpresarial),
-    costeLaboral: Math.round(costeLaboral),
     rn: Math.round(rn),
     reduccion: Math.round(reduccion),
     rneto: Math.round(rneto),
     baseLiq: Math.round(baseLiq),
     cuota: Math.round(irpfFinal),
-    minimoAplicado: Math.round(minimoTotal),
+    minimoAplicado: 0,
     cuotaLiquida: Math.round(irpfFinal),
     dedSMI: 0,
     irpfFinal: Math.round(irpfFinal),
