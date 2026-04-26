@@ -61,12 +61,54 @@
   function highlightTableRow(key) {
     if (!tbody) return;
     tbody.querySelectorAll('tr').forEach(tr => {
-      const rowKey = tr.querySelector('td:nth-child(2)')?.textContent;
-      if (key && rowKey === CCAA_NAMES[key]) {
+      if (key && tr.dataset.key === key) {
         tr.classList.add('highlighted');
         tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } else {
         tr.classList.remove('highlighted');
+      }
+    });
+  }
+
+  // --- Highlight bar by CCAA key + show tooltip ---
+  function highlightBar(key, results) {
+    const tooltip = document.getElementById('bar-tooltip');
+    const supletorioNeto = results.find(r => r.key === 'supletorio')?.res.neto || 0;
+    barDiv.querySelectorAll('.bar-row').forEach(r => {
+      if (key && r.dataset.key === key) {
+        r.classList.add('selected');
+        // Show tooltip for this bar
+        if (tooltip && key) {
+          const res = results.find(x => x.key === key);
+          if (res) {
+            const delta = res.res.neto - supletorioNeto;
+            const deltaClass = delta > 0 ? 'positive' : (delta < 0 ? 'negative' : '');
+            const deltaStr = key === 'supletorio' ? '' : `<span class="tt-delta ${deltaClass}">${delta > 0 ? '+' : ''}${delta.toLocaleString('es-ES')}€</span>`;
+            tooltip.innerHTML = `<div class="tt-name">${CCAA_NAMES[key]}</div>
+              <div class="tt-row"><span class="tt-label">Neto</span><span class="tt-val">${fmt(res.res.neto)}</span></div>
+              <div class="tt-row"><span class="tt-label">IRPF</span><span class="tt-val">${fmt(res.res.irpfFinal)}</span></div>
+              <div class="tt-row"><span class="tt-label">Tipo ef.</span><span class="tt-val">${fmtPct(res.res.tipoEfectivo)}</span></div>
+              <div class="tt-row"><span class="tt-label">Tipo máx.</span><span class="tt-val">${fmtPct(res.res.tipoMax)}</span></div>
+              <div class="tt-row"><span class="tt-label">Coste lab.</span><span class="tt-val">${fmt(res.res.costeLaboral)}</span></div>
+              ${deltaStr ? '<div class="tt-row"><span class="tt-label">vs Supletorio</span>' + deltaStr + '</div>' : ''}`;
+            const rect = r.getBoundingClientRect();
+            const chartRect = barDiv.getBoundingClientRect();
+            const top = rect.top - chartRect.top + rect.height / 2;
+            const left = rect.right - chartRect.left + 8;
+            tooltip.style.top = top + 'px';
+            tooltip.style.transform = 'translateY(-50%)';
+            if (left + 220 > barDiv.clientWidth) {
+              tooltip.style.left = 'auto';
+              tooltip.style.right = (barDiv.clientWidth - (rect.left - chartRect.left) + 8) + 'px';
+            } else {
+              tooltip.style.left = left + 'px';
+              tooltip.style.right = 'auto';
+            }
+            tooltip.classList.add('visible');
+          }
+        }
+      } else {
+        r.classList.remove('selected');
       }
     });
   }
@@ -185,7 +227,7 @@
       const deltaStr = r.key === "supletorio" ? "—" : `<span class="delta ${deltaClass}">${fmtDelta(delta)}</span>`;
 
       const costeLabPct = r.res.bruto > 0 ? (r.res.costeLaboral / r.res.bruto * 100) : 0;
-      html += `<tr class="${rowClass}" title="Coste laboral: ${fmt(r.res.costeLaboral)} (${costeLabPct.toFixed(1)}% del bruto) · SS tra: ${fmt(r.res.cotTra)} · SS emp: ${fmt(r.res.cotEmpresarial)}">
+      html += `<tr class="${rowClass}" data-key="${r.key}" title="Coste laboral: ${fmt(r.res.costeLaboral)} (${costeLabPct.toFixed(1)}% del bruto) · SS tra: ${fmt(r.res.cotTra)} · SS emp: ${fmt(r.res.cotEmpresarial)}">
         <td class="pos">${i + 1}</td>
         <td>${CCAA_NAMES[r.key]}</td>
         <td class="money">${fmt(r.res.neto)}</td>
@@ -197,6 +239,19 @@
       </tr>`;
     });
     tbody.innerHTML = html;
+
+    // Bind click/tap on table rows to highlight bar + show tooltip
+    tbody.querySelectorAll('tr').forEach(tr => {
+      tr.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const key = tr.dataset.key;
+        if (!key) return;
+
+        const allResults = CCAA_KEYS.map(k => ({ key: k, res: calculate(currentSalary, k, getConfig()) }));
+        highlightBar(key, allResults);
+        highlightTableRow(key);
+      });
+    });
   }
 
   // --- Scale chart (step function) ---

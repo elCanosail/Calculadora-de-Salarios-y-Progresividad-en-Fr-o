@@ -239,6 +239,7 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
 .bar-row:hover .bar-fill { filter: brightness(1.12); }
 
 /* Table row highlight */
+#ccaa-table tbody tr { cursor: pointer; transition: background 0.15s; }
 #ccaa-table tbody tr.highlighted {
   background: rgba(59,130,246,0.10) !important;
   outline: 1.5px solid var(--accent);
