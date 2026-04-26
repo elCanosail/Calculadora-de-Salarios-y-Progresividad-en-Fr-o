@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# pre-commit — prevent const/let globals in JS files (cross-script visibility bug)
+set -eo pipefail
+
+DOCS_DIR="$(git rev-parse --show-toplevel)/docs"
+FAILED=0
+
+for jsfile in "$DOCS_DIR"/*.js; do
+  [ -f "$jsfile" ] || continue
+  GLOBAL_CONST_LET=$(grep -cP '^(const|let) ' "$jsfile" 2>/dev/null || true)
+  if [ "$GLOBAL_CONST_LET" -gt 0 ]; then
+    echo "❌ $(basename "$jsfile"): Found $GLOBAL_CONST_LET const/let at global scope"
+    echo "   Cross-script visibility requires 'var' for globals in vanilla JS."
+    echo "   Offending lines:"
+    grep -nP '^(const|let) ' "$jsfile" | head -5
+    echo ""
+    FAILED=1
+  fi
+done
+
+if [ "$FAILED" -eq 1 ]; then
+  echo "⛔ Commit blocked: use 'var' for top-level declarations in vanilla JS"
+  exit 1
+fi
+
+exit 0

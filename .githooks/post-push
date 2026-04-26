@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# post-push — run deploy verification after pushing to origin
+set -eo pipefail
+
+PROJECT_DIR="$(git rev-parse --show-toplevel)"
+SCRIPT="$PROJECT_DIR/scripts/verify-deploy.sh"
+
+if [ -x "$SCRIPT" ]; then
+  echo "🔄 Running post-deploy verification..."
+  "$SCRIPT" https://calculadorairpf.vercel.app
+  if [ $? -ne 0 ]; then
+    echo "⚠️  Deploy verification FAILED — check output above"
+  fi
+fi
