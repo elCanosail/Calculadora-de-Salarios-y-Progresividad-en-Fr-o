@@ -261,6 +261,18 @@ tbody tr.worst td:first-child { font-weight: 700; color: #dc2626; }
   min-width: 200px;
   pointer-events: none;
 }
+/* Mobile: centered fixed tooltip */
+@media (max-width: 640px) {
+  .bar-tooltip.visible {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translate(-50%, -50%) !important;
+    min-width: 260px;
+    max-width: 90vw;
+  }
+}
 .bar-tooltip.visible { display: block; }
 .bar-tooltip .tt-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
 .bar-tooltip .tt-row { display: flex; justify-content: space-between; gap: 12px; }
