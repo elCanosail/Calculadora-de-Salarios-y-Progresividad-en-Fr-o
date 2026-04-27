@@ -14,7 +14,7 @@
   <meta name="twitter:description" content="Calculadora interactiva: escalas IRPF 2026, MEI, solidaridad, coste laboral.">
   <link rel="canonical" href="https://calculadorairpf.vercel.app/">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=21">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self'; connect-src 'self'; font-src 'self';">
 
 <!-- deploy: 1777245573 -->
@@ -130,8 +130,19 @@
               <span>Tu sueldo de hoy en € de <span id="ipc-ano-base">2019</span>:</span>
               <strong id="ipc-salario-ajustado">—</strong>
             </div>
+            <div class="ipc-detail-row">
+              <span>Inflación acumulada (<span id="ipc-ano-base-2">2019</span>→2026):</span>
+              <strong id="ipc-inflacion-pct">—</strong>
+            </div>
+            <div class="ipc-detail-row">
+              <span>Necesitarías ganar hoy:</span>
+              <strong id="ipc-necesitarias">—</strong>
+            </div>
+            <div class="ipc-calc-explanation">
+              <span id="ipc-calc-text">—</span>
+            </div>
             <div class="ipc-detail-row ipc-source">
-              <span>IPC INE base 2021 · 2026 estimado (+3,4%)</span>
+              <span>Datos: <a href="https://www.ine.es/jaxiT3/Tabla.htm?t=224" target="_blank" rel="noopener">IPC INE base 2021</a> · 2026 estimado (+3,4%)</span>
             </div>
           </div>
         </div>
@@ -242,6 +253,6 @@
   </footer>
 
   <script src="data.js?v=20"></script>
-  <script src="app.js?v=27"></script>
+  <script src="app.js?v=28"></script>
 </body>
 </html>

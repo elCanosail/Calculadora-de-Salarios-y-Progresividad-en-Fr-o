@@ -622,6 +622,27 @@
     const anoBase = document.getElementById("ipc-ano-base");
     if (anoBase) anoBase.textContent = selectedIPCYear;
 
+    const anoBase2 = document.getElementById("ipc-ano-base-2");
+    if (anoBase2) anoBase2.textContent = selectedIPCYear;
+
+    // Inflación acumulada
+    const inflacionPct = ((result.ipcTarget / result.ipcBase) - 1) * 100;
+    const inflacionEl = document.getElementById("ipc-inflacion-pct");
+    if (inflacionEl) inflacionEl.textContent = (inflacionPct > 0 ? "+" : "") + inflacionPct.toFixed(1) + "%";
+
+    // Necesitarías ganar
+    const necesitariasEl = document.getElementById("ipc-necesitarias");
+    if (necesitariasEl) necesitariasEl.textContent = fmt(Math.round(necesitarias)) + " €";
+
+    // Explicación del cálculo
+    const calcEl = document.getElementById("ipc-calc-text");
+    if (calcEl) {
+      calcEl.innerHTML = "Cálculo: " + fmt(neto) + " € × (IPC " + selectedIPCYear + " / IPC 2026) = " +
+        fmt(neto) + " × (" + result.ipcBase.toFixed(3) + " / " + result.ipcTarget.toFixed(3) + ") = " +
+        fmt(Math.round(neto * (result.ipcBase / result.ipcTarget))) + " € en € de " + selectedIPCYear +
+        " · Necesitarías " + fmt(Math.round(necesitarias)) + " € hoy para mantener el poder de " + selectedIPCYear;
+    }
+
     // Timeline
     const timeline = document.getElementById("ipc-timeline");
     if (timeline) {
