@@ -3,8 +3,8 @@
 // Cálculo correcto: dos cuotas separadas (estatal + autonómica) sobre la misma base liquidable
 // v5: Añadido IPC INE base 2021 + cálculo coste empresa + desglose visual
 //     Base máxima SS 2026: 61.214,40€/año
-//     Tipo SS trabajador: 6.35% + 0.15% MEI = 6.50%
-//     Tipo SS empresa (cotización común): 23.60% + 0.50% desempleo = 24.10%
+//     Tipo SS trabajador: 4.70% comunes + 1.55% desempleo + 0.10% FP + 0.15% MEI = 6.50%
+//     Tipo SS empresa: 23.60% comunes + 5.50% desempleo + 0.06% FP + 0.75% MEI = 29.91%
 
 // IPC (Índice de Precios de Consumo) — base 2021, medias anuales INE
 // Fuente: INE tabla 50934, serie base 2021, medias anuales
@@ -54,12 +54,14 @@ function calculateIPCAjusted(salary, yearBase, yearTarget) {
 // Cotización seguridad social 2026 — trabajador + empresa
 var SS_CONFIG_2026 = {
     baseMaxima: 61214.40,
-    tipoTrabajador: 0.0635,  // 6.35% contingencias comunes
+    tipoTrabajador: 0.0470,  // 4.70% contingencias comunes
     tipoMEI: 0.0015,         // 0.15% MEI intergeneracional
-    tipoTotalTrabajador: 0.0650,  // 6.35% + 0.15% = 6.50%
+    tipoTotalTrabajador: 0.0650,  // 4.70% + 1.55% desempleo + 0.10% FP + 0.15% MEI
     tipoEmpresaComun: 0.2360,     // 23.60% contingencias comunes empresa
-    tipoEmpresaDesempleo: 0.0050,  // 0.50% desempleo empresa
-    tipoTotalEmpresa: 0.2410,     // 24.10% total empresa
+    tipoEmpresaDesempleo: 0.0550,  // 5.50% desempleo empresa
+    tipoEmpresaFP: 0.0006,          // 0.06% FP empresa
+    tipoEmpresaMEI: 0.0075,        // 0.75% MEI empresa
+    tipoTotalEmpresa: 0.2991,       // 23.60% + 5.50% + 0.06% + 0.75% = 29.91%
     minimoContribuyente: 2268     // Mínimo tributable 2026
 };
 
@@ -169,11 +171,12 @@ var AUTONOMICAS = {
     [12985.35, 0.09], [21068.60, 0.1165], [35200, 0.149], [60000, 0.184], [Infinity, 0.225]
   ],
   la_rioja: [
-    [12450, 0.095], [20200, 0.12], [35200, 0.15], [60000, 0.192], [Infinity, 0.225]
+    [12450, 0.09], [20200, 0.118], [35200, 0.15], [50000, 0.19],
+    [65000, 0.22], [80000, 0.235], [120000, 0.245], [Infinity, 0.27]
   ],
   madrid: [
-    [13362.22, 0.085], [19004.63, 0.107], [35425.68, 0.128], [60000, 0.179],
-    [90000, 0.205], [175000, 0.235], [Infinity, 0.255]
+    [13362.22, 0.085], [19004.63, 0.107], [35425.68, 0.128], [57320.40, 0.174],
+    [Infinity, 0.205]
   ],
   murcia: [
     [12450, 0.095], [20200, 0.112], [35200, 0.133], [60000, 0.192], [Infinity, 0.225]
@@ -248,19 +251,19 @@ var ESCALAS = {};
 // ─── Parámetros SS 2026 ───
 // Base máxima: Orden PJC/297/2026 (5.101,20 €/mes = 61.214,40 €/año)
 // Tipos SS 2026: Comunes 28,30% (23,60% emp + 4,70% tra) + Desempleo + FP
-// MEI 2026: 0,80% total (0,67% emp + 0,13% tra) — Orden PJC/297/2026
+// MEI 2026: 0,80% total (0,75% emp + 0,15% tra) — Orden PJC/297/2026
 // Cuota de solidaridad: RDL 8/2025 + RDL 3/2026 (tramos progresivos sobre exceso de base)
 var BASE_MAX_SS = 61214.40;
 var TIPO_SS_COMUNES_TRA = 0.0470;
 var TIPO_SS_DESEMPLEO_TRA = 0.0155;
 var TIPO_SS_FP_TRA = 0.0010;
-var TIPO_MEI_TRA = 0.0013;
-var TIPO_SS_TRA = TIPO_SS_COMUNES_TRA + TIPO_SS_DESEMPLEO_TRA + TIPO_SS_FP_TRA + TIPO_MEI_TRA; // 0.0648
+var TIPO_MEI_TRA = 0.0015;
+var TIPO_SS_TRA = TIPO_SS_COMUNES_TRA + TIPO_SS_DESEMPLEO_TRA + TIPO_SS_FP_TRA + TIPO_MEI_TRA; // 0.0650
 var TIPO_SS_EMPRESARIAL_COMUNES = 0.2360;
 var TIPO_SS_EMPRESARIAL_DESEMPLEO = 0.0550; // contrato indefinido
 var TIPO_SS_EMPRESARIAL_FP = 0.0006;
-var TIPO_MEI_EMPRESARIAL = 0.0067;
-var TIPO_SS_EMPRESARIAL = TIPO_SS_EMPRESARIAL_COMUNES + TIPO_SS_EMPRESARIAL_DESEMPLEO + TIPO_SS_EMPRESARIAL_FP + TIPO_MEI_EMPRESARIAL; // 0.2983
+var TIPO_MEI_EMPRESARIAL = 0.0075;
+var TIPO_SS_EMPRESARIAL = TIPO_SS_EMPRESARIAL_COMUNES + TIPO_SS_EMPRESARIAL_DESEMPLEO + TIPO_SS_EMPRESARIAL_FP + TIPO_MEI_EMPRESARIAL; // 0.2991
 
 // Cuota de solidaridad 2026 (solo para bases > BASE_MAX_SS)
 // RDL 3/2026: tramos progresivos sobre el exceso de base
@@ -451,8 +454,8 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
     const cuotaLiq = Math.max(0, cuota - cuotaMin);
 
     let dedSMI = 0;
-    if (brutoPos <= 16576) dedSMI = 340;
-    else if (brutoPos <= 18276) dedSMI = Math.max(0, 340 - 0.20 * (brutoPos - 16576));
+    if (brutoPos <= 17094) dedSMI = 590.89;
+    else if (brutoPos <= 18894) dedSMI = Math.max(0, 590.89 - 0.3277 * (brutoPos - 17094));
 
     const cuotaResult = Math.max(0, cuotaLiq - dedSMI);
     const limiteRet = Math.max(0, (brutoPos - MINIMO_EXENTO) * TOPE_RETENCION);
@@ -479,10 +482,10 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
     const cuotaLiqEst = Math.max(0, cuotaEst - minEst);
     const cuotaLiqAut = Math.max(0, cuotaAut - minAut);
 
-    // Deducción SMI (se reparte proporcionalmente entre estatal y autonómica)
+    // Deducción SMI 2026 (590,89€ máx, umbrales 17.094€ / 18.894€)
     let dedSMI = 0;
-    if (brutoPos <= 16576) dedSMI = 340;
-    else if (brutoPos <= 18276) dedSMI = Math.max(0, 340 - 0.20 * (brutoPos - 16576));
+    if (brutoPos <= 17094) dedSMI = 590.89;
+    else if (brutoPos <= 18894) dedSMI = Math.max(0, 590.89 - 0.3277 * (brutoPos - 17094));
 
     const cuotaLiqTotal = cuotaLiqEst + cuotaLiqAut;
     const ratioEst = cuotaLiqTotal > 0 ? cuotaLiqEst / cuotaLiqTotal : 0.5;
@@ -583,8 +586,8 @@ function calcularIRPFYear(bruto, ccaaKey, year, config) {
     const cuotaMin = cuotaMinimoPersonal(minimoTotal, baseLiq, escala);
     const cuotaLiq = Math.max(0, cuota - cuotaMin);
     let dedSMI = 0;
-    if (brutoPos <= 16576) dedSMI = 340;
-    else if (brutoPos <= 18276) dedSMI = Math.max(0, 340 - 0.20 * (brutoPos - 16576));
+    if (brutoPos <= 17094) dedSMI = 590.89;
+    else if (brutoPos <= 18894) dedSMI = Math.max(0, 590.89 - 0.3277 * (brutoPos - 17094));
     const cuotaResult = Math.max(0, cuotaLiq - dedSMI);
     const limiteRet = Math.max(0, (brutoPos - MINIMO_EXENTO) * TOPE_RETENCION);
     irpfFinal = Math.min(cuotaResult, limiteRet);
@@ -599,8 +602,8 @@ function calcularIRPFYear(bruto, ccaaKey, year, config) {
     const cuotaLiqEst = Math.max(0, cuotaEst - minEst);
     const cuotaLiqAut = Math.max(0, cuotaAut - minAut);
     let dedSMI = 0;
-    if (brutoPos <= 16576) dedSMI = 340;
-    else if (brutoPos <= 18276) dedSMI = Math.max(0, 340 - 0.20 * (brutoPos - 16576));
+    if (brutoPos <= 17094) dedSMI = 590.89;
+    else if (brutoPos <= 18894) dedSMI = Math.max(0, 590.89 - 0.3277 * (brutoPos - 17094));
     const cuotaLiqTotal = cuotaLiqEst + cuotaLiqAut;
     const ratioEst = cuotaLiqTotal > 0 ? cuotaLiqEst / cuotaLiqTotal : 0.5;
     const cuotaResEst = Math.max(0, cuotaLiqEst - dedSMI * ratioEst);
