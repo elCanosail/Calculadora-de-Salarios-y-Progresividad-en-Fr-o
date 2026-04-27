@@ -116,28 +116,30 @@ git config core.hooksPath .githooks
 ./scripts/verify-deploy.sh
 ```
 
-## 📐 Cálculo (régimen común, v4)
+## 📐 Cálculo (régimen común, v5.1)
 
 ```
  1. Base SS = min(bruto, 61.214,40€)
- 2. Cotización SS = Base SS × 6,35%
- 3. MEI trabajador = Base SS × 0,13%
- 4. Cuota solidaridad (si bruto > base máx. SS) = tramos progresivos / 6
- 5. Rendimiento neto previo = bruto - cotización SS - MEI - solidaridad trab.
- 6. Reducción art. 20 = tramos según rn previo (máx. 7.302€)
- 7. Rendimiento neto = rn previo - 2.000€ gastos - reducción art. 20
+ 2. Cotización SS = Base SS × 6,48% (comunes 6,35% + MEI 0,13%)
+ 3. Cuota solidaridad (si bruto > base máx. SS) = tramos progresivos / 6
+ 4. Rendimiento neto previo = bruto - cotización SS - solidaridad trab.
+ 5. Reducción art. 20 = tramos según rn previo (máx. 7.302€)
+ 6. Gastos fijos = 2.000€ (+ 3.000€ adicionales si discapacidad ≥65% con movilidad reducida)
+ 7. Rendimiento neto = rn previo - gastos - reducción art. 20
  8. Base liquidable = rendimiento neto
  9. Cuota estatal = aplicar escala estatal (Art. 76 LIRPF) a base liquidable
 10. Cuota autonómica = aplicar escala autonómica (PDF Hacienda 2026) a base liquidable
-11. Reducción mínimo personal = aplicar escala a mínimo total (Art. 63 LIRPF)
+11. Reducción mínimo personal = aplicar escalas a mínimo total (Art. 63 LIRPF)
 12. Cuota líquida = (cuota estatal - mín.est.) + (cuota aut. - mín.aut.)
-13. Deducción SMI si bruto ≤ 18.276€ (Art. 80 LIRPF)
-14. Límite retención = min(cuota resultante, 43% × rendimiento)
-15. Neto = bruto - (SS + MEI + solidaridad) - IRPF final
+13. Deducción SMI si bruto ≤ 18.894€ (Art. 80 LIRPF)
+14. Límite retención = min(cuota resultante, 43% × rendimiento neto ajustado)
+15. Neto = bruto - (SS + solidaridad) - IRPF final
 16. Coste laboral = bruto + SS empresarial + MEI empresarial + solidaridad empresarial
 ```
 
-**CCAA forales (Navarra, País Vasco):** Escala única propia, sin desglose estatal/autonómico.
+**CCAA forales (Navarra, País Vasco):** Escala única propia (cuota íntegra), sin desglose estatal/autonómico. Tipo máximo: Navarra 52%, País Vasco 49%.
+
+**Nota importante (v5.1):** El límite de retención del 43% (Art. 97 LIRPF) se aplica sobre el **rendimiento neto** (después de deducir SS, gastos y reducciones), no sobre el bruto. Esta corrección reduce el IRPF para salarios altos respecto a versiones anteriores.
 
 ## 🔄 Changelog
 
@@ -147,8 +149,9 @@ git config core.hooksPath .githooks
 | v2.0 | 2026-04-24 | Fix: mínimo según Art. 63 + escalas separadas (PDF Hacienda) |
 | v3.0 | 2026-04-24 | Escalas corregidas: La Rioja propia, tipos máx corregidos |
 | v3.1 | 2026-04-25 | Fix: Aragón/Baleares/Canarias tipo máx 0.255 |
-| **v4** | **2026-04-26** | **MEI + cuota solidaridad + base máx SS 61.214€ + coste laboral + comparativa anual + verificación AEAT** |
-| **v5** | **2026-04-26** | **Radiografía del coste (donut SVG) + Comparativa IPC (INE 2012–2026) + Desglose tramos IRPF + Tooltips interactivos** |
+| v4 | 2026-04-26 | MEI + cuota solidaridad + base máx SS 61.214€ + coste laboral + comparativa anual + verificación AEAT |
+| v5 | 2026-04-26 | Radiografía del coste (donut SVG) + Comparativa IPC (INE 2012–2026) + Desglose tramos IRPF + Tooltips interactivos |
+| **v5.1** | **2026-04-27** | **Fix crítico: límite retención 43% sobre rendimiento neto (no bruto) + gastos discapacidad 65% + tipo máximo forales corregido** |
 
 ## ⚖️ Aviso legal
 
