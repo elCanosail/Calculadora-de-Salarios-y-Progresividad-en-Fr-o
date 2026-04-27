@@ -435,6 +435,14 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
   // 4. Rendimiento neto
   const rneto = Math.max(0, rn - GASTOS_FIJOS - reduccion);
 
+  // 4b. Gastos especiales discapacidad (Art. 19.2.f LIRPF)
+  // +3.000€ para discapacidad ≥65% con necesidad ayuda terceros o movilidad reducida
+  let gastosDiscapacidad = 0;
+  if (discapacidad >= 65) gastosDiscapacidad = 3000;
+  
+  // Ajustar rendimiento neto con gastos discapacidad adicionales
+  const rnetoAjustado = Math.max(0, rneto - gastosDiscapacidad);
+
   // 5. Mínimo personal + familiares
   const minimoPersonal = MINIMO_EDAD[edad] || MINIMO_EDAD.normal;
   const minimoHijos = MINIMO_HIJO[Math.min(hijos, 5)] || 0;
@@ -442,8 +450,8 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
   const minimoDiscapacidad = MINIMO_DISCAPACIDAD[discapacidad] || 0;
   const minimoTotal = minimoPersonal + minimoHijos + minimoAscendientes + minimoDiscapacidad;
 
-  // 6. Base liquidable (el mínimo personal NO se resta de la base)
-  const baseLiq = Math.max(0, rneto);
+  // 6. Base liquidable
+  const baseLiq = Math.max(0, rnetoAjustado);
 
   let irpfFinal, irpfEstatal, irpfAutonomica, tipoMax;
 
@@ -459,12 +467,12 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
     else if (brutoPos <= 18894) dedSMI = Math.max(0, 590.89 - 0.3277 * (brutoPos - 17094));
 
     const cuotaResult = Math.max(0, cuotaLiq - dedSMI);
-    const limiteRet = Math.max(0, (brutoPos - MINIMO_EXENTO) * TOPE_RETENCION);
-    irpfFinal = Math.min(cuotaResult, limiteRet);
+    const limiteRetForal = Math.max(0, (rnetoAjustado - MINIMO_EXENTO) * TOPE_RETENCION);
+    irpfFinal = Math.min(cuotaResult, limiteRetForal);
     irpfEstatal = 0;
     irpfAutonomica = irpfFinal;
 
-    // tipoMax = último tipo de la escala foral
+    // tipoMax = tipo máximo de la escala foral (cuota única)
     tipoMax = escala[escala.length - 1][1];
 
   } else {
@@ -496,8 +504,8 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
     const cuotaResEst = Math.max(0, cuotaLiqEst - dedEst);
     const cuotaResAut = Math.max(0, cuotaLiqAut - dedAut);
 
-    // Límite de retención (43% del rendimiento)
-    const limiteRet = Math.max(0, (brutoPos - MINIMO_EXENTO) * TOPE_RETENCION);
+    // Límite de retención (43% del rendimiento neto del trabajo)
+    const limiteRet = Math.max(0, (rnetoAjustado - MINIMO_EXENTO) * TOPE_RETENCION);
 
     irpfEstatal = Math.min(cuotaResEst, limiteRet);
     irpfAutonomica = Math.min(cuotaResAut, Math.max(0, limiteRet - irpfEstatal));
@@ -574,6 +582,12 @@ function calcularIRPFYear(bruto, ccaaKey, year, config) {
   else if (rn <= 19747.50) reduccion = 2364.34 - 1.14 * (rn - 17673.52);
   reduccion = Math.max(0, reduccion);
   const rneto = Math.max(0, rn - GASTOS_FIJOS - reduccion);
+  
+  // Gastos especiales discapacidad
+  let gastosDiscapacidad = 0;
+  if (discapacidad >= 65) gastosDiscapacidad = 3000;
+  const rnetoAjustado = Math.max(0, rneto - gastosDiscapacidad);
+  
   const minimoPersonal = MINIMO_EDAD[edad] || MINIMO_EDAD.normal;
   const minimoHijos = MINIMO_HIJO[Math.min(hijos, 5)] || 0;
   const minimoAscendientes = Math.min(ascendientes, 4) * MINIMO_ASCENDIENTE;
@@ -590,7 +604,7 @@ function calcularIRPFYear(bruto, ccaaKey, year, config) {
     if (brutoPos <= 17094) dedSMI = 590.89;
     else if (brutoPos <= 18894) dedSMI = Math.max(0, 590.89 - 0.3277 * (brutoPos - 17094));
     const cuotaResult = Math.max(0, cuotaLiq - dedSMI);
-    const limiteRet = Math.max(0, (brutoPos - MINIMO_EXENTO) * TOPE_RETENCION);
+    const limiteRet = Math.max(0, (rnetoAjustado - MINIMO_EXENTO) * TOPE_RETENCION);
     irpfFinal = Math.min(cuotaResult, limiteRet);
     irpfEstatal = 0; irpfAutonomica = irpfFinal;
     tipoMax = escala[escala.length - 1][1];
@@ -609,7 +623,7 @@ function calcularIRPFYear(bruto, ccaaKey, year, config) {
     const ratioEst = cuotaLiqTotal > 0 ? cuotaLiqEst / cuotaLiqTotal : 0.5;
     const cuotaResEst = Math.max(0, cuotaLiqEst - dedSMI * ratioEst);
     const cuotaResAut = Math.max(0, cuotaLiqAut - dedSMI * (1 - ratioEst));
-    const limiteRet = Math.max(0, (brutoPos - MINIMO_EXENTO) * TOPE_RETENCION);
+    const limiteRet = Math.max(0, (rnetoAjustado - MINIMO_EXENTO) * TOPE_RETENCION);
     irpfEstatal = Math.min(cuotaResEst, limiteRet);
     irpfAutonomica = Math.min(cuotaResAut, Math.max(0, limiteRet - irpfEstatal));
     irpfFinal = irpfEstatal + irpfAutonomica;
