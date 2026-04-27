@@ -632,15 +632,15 @@
 
     // Necesitarías ganar
     const necesitariasEl = document.getElementById("ipc-necesitarias");
-    if (necesitariasEl) necesitariasEl.textContent = fmt(Math.round(necesitarias)) + " €";
+    if (necesitariasEl) necesitariasEl.textContent = fmt(Math.round(necesitarias));
 
     // Explicación del cálculo
     const calcEl = document.getElementById("ipc-calc-text");
     if (calcEl) {
-      calcEl.innerHTML = "Cálculo: " + fmt(neto) + " € × (IPC " + selectedIPCYear + " / IPC 2026) = " +
+      calcEl.innerHTML = "Cálculo: " + fmt(neto) + " × (IPC " + selectedIPCYear + " / IPC 2026) = " +
         fmt(neto) + " × (" + result.ipcBase.toFixed(3) + " / " + result.ipcTarget.toFixed(3) + ") = " +
-        fmt(Math.round(neto * (result.ipcBase / result.ipcTarget))) + " € en € de " + selectedIPCYear +
-        " · Necesitarías " + fmt(Math.round(necesitarias)) + " € hoy para mantener el poder de " + selectedIPCYear;
+        fmt(Math.round(neto * (result.ipcBase / result.ipcTarget))) + " en € de " + selectedIPCYear +
+        " · Necesitarías " + fmt(Math.round(necesitarias)) + " hoy para mantener el poder de " + selectedIPCYear;
     }
 
     // Timeline
