@@ -4,7 +4,7 @@
 // v5: Añadido IPC INE base 2021 + cálculo coste empresa + desglose visual
 //     Base máxima SS 2026: 61.214,40€/año
 //     Tipo SS trabajador: 4.70% comunes + 1.55% desempleo + 0.10% FP + 0.15% MEI = 6.50%
-//     Tipo SS empresa: 23.60% comunes + 5.50% desempleo + 0.06% FP + 0.75% MEI = 29.91%
+//     Tipo SS empresa: 23.60% comunes + 5.50% desempleo + 0.60% FP + 0.75% MEI = 30.45%
 
 // IPC (Índice de Precios de Consumo) — base 2021, medias anuales INE
 // Fuente: INE tabla 50934, serie base 2021, medias anuales
@@ -59,9 +59,9 @@ var SS_CONFIG_2026 = {
     tipoTotalTrabajador: 0.0650,  // 4.70% + 1.55% desempleo + 0.10% FP + 0.15% MEI
     tipoEmpresaComun: 0.2360,     // 23.60% contingencias comunes empresa
     tipoEmpresaDesempleo: 0.0550,  // 5.50% desempleo empresa
-    tipoEmpresaFP: 0.0006,          // 0.06% FP empresa
+    tipoEmpresaFP: 0.006,           // 0.60% FP empresa (Orden PJC/297/2026)
     tipoEmpresaMEI: 0.0075,        // 0.75% MEI empresa
-    tipoTotalEmpresa: 0.2991,       // 23.60% + 5.50% + 0.06% + 0.75% = 29.91%
+    tipoTotalEmpresa: 0.3045,       // 23.60% + 5.50% + 0.60% + 0.75% = 30.45% (Orden PJC/297/2026)
     minimoContribuyente: 2268     // Mínimo tributable 2026
 };
 
@@ -262,9 +262,9 @@ var TIPO_MEI_TRA = 0.0015;
 var TIPO_SS_TRA = TIPO_SS_COMUNES_TRA + TIPO_SS_DESEMPLEO_TRA + TIPO_SS_FP_TRA + TIPO_MEI_TRA; // 0.0650
 var TIPO_SS_EMPRESARIAL_COMUNES = 0.2360;
 var TIPO_SS_EMPRESARIAL_DESEMPLEO = 0.0550; // contrato indefinido
-var TIPO_SS_EMPRESARIAL_FP = 0.0006;
-var TIPO_MEI_EMPRESARIAL = 0.0075;
-var TIPO_SS_EMPRESARIAL = TIPO_SS_EMPRESARIAL_COMUNES + TIPO_SS_EMPRESARIAL_DESEMPLEO + TIPO_SS_EMPRESARIAL_FP + TIPO_MEI_EMPRESARIAL; // 0.2991
+var TIPO_SS_EMPRESARIAL_FP = 0.006;  // 0.60% FP empresa (Orden PJC/297/2026)
+var TIPO_MEI_EMPRESARIAL = 0.0075;  // 0.75% MEI empresa (Orden PJC/297/2026)
+var TIPO_SS_EMPRESARIAL = TIPO_SS_EMPRESARIAL_COMUNES + TIPO_SS_EMPRESARIAL_DESEMPLEO + TIPO_SS_EMPRESARIAL_FP + TIPO_MEI_EMPRESARIAL; // 0.3001 = 30.01%
 
 // Cuota de solidaridad 2026 (solo para bases > BASE_MAX_SS)
 // RDL 3/2026: tramos progresivos sobre el exceso de base
@@ -308,7 +308,7 @@ var YEAR_PARAMS = {
     tipoMeiTra: 0.0,           // sin MEI
     tipoSSEmpresarialComunes: 0.2360,
     tipoSSEmpresarialDesempleo: 0.0550,
-    tipoSSEmpresarialFp: 0.0006,
+    tipoSSEmpresarialFp: 0.006,
     tipoMeiEmpresarial: 0.0,
     solidaridad: false,
     escalaEstatal: [
@@ -324,7 +324,7 @@ var YEAR_PARAMS = {
     tipoMeiTra: 0.0,           // sin MEI (aplazado)
     tipoSSEmpresarialComunes: 0.2360,
     tipoSSEmpresarialDesempleo: 0.0550,
-    tipoSSEmpresarialFp: 0.0006,
+    tipoSSEmpresarialFp: 0.006,
     tipoMeiEmpresarial: 0.0,
     solidaridad: false,
     escalaEstatal: [
@@ -340,7 +340,7 @@ var YEAR_PARAMS = {
     tipoMeiTra: 0.0015,        // 0.15% trabajador
     tipoSSEmpresarialComunes: 0.2360,
     tipoSSEmpresarialDesempleo: 0.0550,
-    tipoSSEmpresarialFp: 0.0006,
+    tipoSSEmpresarialFp: 0.006,
     tipoMeiEmpresarial: 0.0075, // 0.75% empresarial
     solidaridad: true,
     escalaEstatal: [
@@ -473,7 +473,7 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
     irpfAutonomica = irpfFinal;
 
     // tipoMax = tipo máximo de la escala foral (cuota única)
-    tipoMax = escala[escala.length - 1][1];
+    tipoMax = escala[escala.length - 1][1] * 100;
 
   } else {
     // ─── RÉGIMEN COMÚN: dos cuotas separadas ───
@@ -517,8 +517,8 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
     }
 
     // tipoMax = máximo entre tipo máximo estatal y autonómico combinado
-    const tipoMaxEst = ESTATAL[ESTATAL.length - 1][1];
-    const tipoMaxAut = escalaAut[escalaAut.length - 1][1];
+    const tipoMaxEst = ESTATAL[ESTATAL.length - 1][1] * 100;
+    const tipoMaxAut = escalaAut[escalaAut.length - 1][1] * 100;
     tipoMax = tipoMaxEst + tipoMaxAut;
   }
 
@@ -546,7 +546,7 @@ function calcularIRPF(bruto, ccaaKey, config = DEFAULT_CONFIG) {
     irpfAutonomica: Math.round(irpfAutonomica),
     neto: Math.round(neto),
     tipoEfectivo: +tipoEfectivo.toFixed(2),
-    tipoMax: +(tipoMax * 100).toFixed(1),
+    tipoMax: +(tipoMax).toFixed(1),
     _minimoTotal: Math.round(minimoTotal)
   };
 }
@@ -637,7 +637,7 @@ function calcularIRPFYear(bruto, ccaaKey, year, config) {
     costeLaboral: Math.round(costeLaboral), neto: Math.round(neto),
     irpfFinal: Math.round(irpfFinal), irpfEstatal: Math.round(irpfEstatal),
     irpfAutonomica: Math.round(irpfAutonomica), tipoEfectivo: +tipoEfectivo.toFixed(2),
-    tipoMax: +(tipoMax * 100).toFixed(1), year: year
+    tipoMax: +(tipoMax).toFixed(1), year: year
   };
 }
 
