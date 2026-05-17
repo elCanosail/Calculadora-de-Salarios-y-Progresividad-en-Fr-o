@@ -76,6 +76,9 @@ Este fork parte del excelente trabajo de Jon González (auditoría Python → Ex
 ## 🏗️ Estructura del proyecto
 
 ```
+motor.py           # Motor fiscal importable (sin side effects)
+cli.py             # CLI de consulta rápida (5 comandos)
+Calculo_Salario_IRPF.py  # Genera el Excel completo
 docs/
 ├── index.html      # Calculadora principal
 ├── data.js         # Escalas IRPF 2026 (estatal + autonómicas + forales) + datos anuales
@@ -86,6 +89,36 @@ docs/
 └── escalas.csv     # CSV descargable con todas las escalas
 ```
 
+## ⌨️ CLI de consulta rápida
+
+`cli.py` permite consultar el motor fiscal desde terminal sin generar el Excel de 144 MB.
+
+```bash
+# Comparativa IPC: 30.000€ en 2026 vs su equivalente real en 2019
+python cli.py ipc 30000
+
+# Tipo marginal efectivo en un rango salarial
+python cli.py marginal --anio 2026 --desde 16500 --hasta 18500 --paso 500
+
+# Nómina anual concreta
+python cli.py salario 30000 --anio 2026
+
+# Tabla por rango salarial
+python cli.py tabla --anio 2026 --desde 20000 --hasta 40000 --paso 10000
+
+# Comparar el mismo bruto entre años (sin ajustar por IPC)
+python cli.py comparar 30000 --desde-anio 2024 --hasta-anio 2026
+```
+
+Ver [CLI.md](CLI.md) para documentación completa.
+
+## 🏗️ Arquitectura
+
+- **`motor.py`** — Motor fiscal importable (parámetros, cálculo de nómina, IPC). Sin side effects.
+- **`cli.py`** — CLI que importa de `motor.py`. Los 5 comandos anteriores.
+- **`Calculo_Salario_IRPF.py`** — Genera el Excel completo. Importa de `motor.py`.
+- **`docs/`** — Web app interactiva (calculadora + fórmulas + fuentes)
+
 ## 🚀 Uso local
 
 ```bash
@@ -93,6 +126,7 @@ git clone https://github.com/elCanosail/Calculadora-de-Salarios-y-Progresividad-
 cd Calculadora-de-Salarios-y-Progresividad-en-Fr-o
 # Activar hooks (pre-commit + post-push)
 git config core.hooksPath .githooks
+pip install -r requirements.txt
 cd docs
 # Abrir docs/index.html en el navegador (no necesita servidor)
 ```
